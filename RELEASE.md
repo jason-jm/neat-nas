@@ -10,6 +10,12 @@
 
 ## Cutting a release
 
+The whole flow is one command; the steps below are what it does.
+
+```bash
+scripts/release.sh 1.0.1
+```
+
 1. Bump the version in `package.json`, `src-tauri/Cargo.toml` and `src-tauri/tauri.conf.json` (keep them identical), commit and push.
 2. Tag and push the tag:
    ```bash
