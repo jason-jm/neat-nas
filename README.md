@@ -18,6 +18,10 @@ Save the address, user name and password a single time. From then on, every laun
 
 [English](README.md) · [简体中文](docs/i18n/README.zh-CN.md) · [繁體中文](docs/i18n/README.zh-TW.md) · [日本語](docs/i18n/README.ja.md) · [한국어](docs/i18n/README.ko.md) · [Deutsch](docs/i18n/README.de.md) · [Español](docs/i18n/README.es.md) · [Français](docs/i18n/README.fr.md) · [Português](docs/i18n/README.pt-BR.md) · [Русский](docs/i18n/README.ru.md)
 
+<br>
+
+<img src="docs/assets/screenshots/en/grid-dark.png" width="860" alt="Neat NAS browsing a photo folder on a NAS">
+
 </div>
 
 ---

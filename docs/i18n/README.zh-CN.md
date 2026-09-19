@@ -12,6 +12,10 @@ Mac 和 Windows 上最轻量的 NAS 文件浏览器。地址、用户名、密�
 
 [English](../../README.md) · [简体中文](README.zh-CN.md) · [繁體中文](README.zh-TW.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [Français](README.fr.md) · [Português](README.pt-BR.md) · [Русский](README.ru.md)
 
+<br>
+
+<img src="../assets/screenshots/zh-CN/grid-dark.png" width="860" alt="Neat NAS 浏览 NAS 上的照片文件夹">
+
 </div>
 
 ---

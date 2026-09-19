@@ -76,7 +76,14 @@ const tree: Record<string, Spec> = {
       Tokyo: { "DSC_0001.jpg": 4_100_000, "DSC_0002.jpg": 3_900_000, "DSC_0003.jpg": 4_400_000 },
       Home: { "birthday.mov": 320_000_000 },
     },
-    "2025": { "Kyoto.zip": 1_200_000_000 },
+    "2025": {
+      Kyoto: {
+        ...Object.fromEntries(Array.from({ length: 14 }, (_, i) => [`DSC_${String(i + 1).padStart(4, "0")}.jpg`, 3_200_000 + i * 240_000])),
+        "Fushimi Inari.mov": 480_000_000,
+        "Arashiyama.heic": 2_900_000,
+      },
+      "Kyoto.zip": 1_200_000_000,
+    },
   },
   video: {
     Movies: { "Interstellar (2014).mkv": 14_000_000_000 },
@@ -158,7 +165,10 @@ function newTransfer(kind: "download" | "upload", serverId: string, share: strin
 }
 
 function svgDataUrl(label: string, hue: number, w = 320, h = 240): string {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(${hue},70%,55%)"/><stop offset="1" stop-color="hsl(${(hue + 60) % 360},70%,35%)"/></linearGradient></defs><rect width="${w}" height="${h}" fill="url(#g)"/><circle cx="${w * 0.7}" cy="${h * 0.35}" r="${h * 0.12}" fill="rgba(255,255,255,0.7)"/><text x="12" y="${h - 14}" font-family="sans-serif" font-size="14" fill="rgba(255,255,255,0.85)">${label.replace(/[<&>]/g, "")}</text></svg>`;
+  const sky2 = (hue + 40) % 360;
+  const land = (hue + 200) % 360;
+  const j = hue % 50;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 320 240" preserveAspectRatio="xMidYMid slice"><title>${label.replace(/[<&>]/g, "")}</title><defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="hsl(${hue},62%,60%)"/><stop offset="1" stop-color="hsl(${sky2},75%,80%)"/></linearGradient><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="hsl(${land},35%,40%)"/><stop offset="1" stop-color="hsl(${land},40%,20%)"/></linearGradient></defs><rect width="320" height="240" fill="url(#s)"/><circle cx="${80 + j * 3}" cy="${64 + j}" r="24" fill="hsl(${(hue + 25) % 360},95%,86%)" opacity="0.95"/><path d="M0 172 L60 ${118 + j / 2} L120 158 L180 ${100 + j} L240 150 L320 ${112 + j / 2} L320 240 L0 240 Z" fill="url(#g)"/><path d="M0 206 L80 ${182 + j / 4} L160 202 L240 ${176 + j / 3} L320 196 L320 240 L0 240 Z" fill="hsl(${land},42%,15%)" opacity="0.92"/></svg>`;
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
 
@@ -203,7 +213,8 @@ function simulate(p: TransferProgress) {
 export const mock: Backend = {
   async listServers() {
     await delay(60);
-    return servers.slice();
+    // Scripted runs (screenshots) want exactly one NAS so the app auto-connects.
+    return new URLSearchParams(window.location.search).has("autopilot") ? servers.slice(0, 1) : servers.slice();
   },
   async testConnection(input: ServerInput): Promise<ConnectionInfo> {
     await delay(700);

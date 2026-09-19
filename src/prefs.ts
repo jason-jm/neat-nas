@@ -27,6 +27,9 @@ export function writeDoubleClick(action: DoubleClickAction) {
 
 export function readTheme(): ThemePref {
   try {
+    // `?theme=dark|light` forces a theme for screenshots and dev runs.
+    const q = new URLSearchParams(window.location.search).get("theme");
+    if (q === "light" || q === "dark") return q;
     const s = localStorage.getItem(THEME_KEY);
     if (s === "light" || s === "dark") return s;
   } catch {

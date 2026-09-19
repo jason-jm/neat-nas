@@ -47,7 +47,7 @@
   nav { height: 60px; display: flex; align-items: center; gap: 22px; }
   .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; letter-spacing: -.01em; }
   .brand img { width: 28px; height: 28px; border-radius: 7px; }
-  nav .links { display: flex; gap: 18px; margin-left: auto; font-size: 14px; color: var(--text-2); }
+  nav .links { display: flex; align-items: center; gap: 18px; margin-left: auto; font-size: 14px; color: var(--text-2); }
   nav .links a:hover { color: var(--text); }
   select.lang { appearance: none; -webkit-appearance: none; background: var(--bg-2); border: 1px solid var(--line-2); color: var(--text); border-radius: 8px; padding: 6px 28px 6px 10px; font: inherit; font-size: 13px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 9px center; }
   button.theme { width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--line-2); background: var(--bg-2); color: var(--text-2); display: grid; place-items: center; cursor: pointer; }
@@ -69,31 +69,19 @@
   .btn svg { width: 18px; height: 18px; }
   .fine { font-size: 12.5px; color: var(--text-3); margin-top: 14px; }
   .fine a { color: var(--text-2); text-decoration: underline; text-underline-offset: 3px; }
-  /* App mockup */
-  .mock { background: var(--bg-2); border: 1px solid var(--line-2); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; display: grid; grid-template-columns: 168px 1fr; height: 400px; font-size: 12px; transform: perspective(1400px) rotateY(-6deg) rotateX(2deg); transition: transform .5s ease; }
-  .mock:hover { transform: none; }
-  .mock .side { background: var(--bg-3); border-right: 1px solid var(--line); padding: 14px 10px; }
-  .dots { display: flex; gap: 7px; padding: 4px 6px 16px; }
-  .dots i { width: 11px; height: 11px; border-radius: 50%; display: block; }
-  .nas { display: flex; align-items: center; gap: 9px; padding: 9px 10px; border-radius: 9px; background: var(--accent-soft); }
-  .nas .ico { width: 26px; height: 26px; border-radius: 7px; background: var(--accent); display: grid; place-items: center; color: #fff; }
-  .nas .ico svg { width: 15px; height: 15px; }
-  .nas b { display: block; font-size: 12px; }
-  .nas small { color: var(--text-3); font-size: 10.5px; }
-  .nas .dot { margin-left: auto; width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 3px rgba(47,179,68,.18); }
-  .mock .main { display: flex; flex-direction: column; min-width: 0; }
-  .tb { height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 14px; border-bottom: 1px solid var(--line); color: var(--text-3); }
-  .tb .crumb { font-weight: 600; color: var(--text); }
-  .tb .search { margin-left: auto; width: 150px; height: 26px; border-radius: 7px; background: var(--bg-3); border: 1px solid var(--line); display: flex; align-items: center; padding: 0 8px; gap: 6px; font-size: 11px; }
-  .tb .pill { height: 26px; padding: 0 9px; border-radius: 7px; background: var(--accent); color: #fff; display: flex; align-items: center; font-weight: 600; font-size: 11px; }
-  .rows { padding: 6px 8px; }
-  .row { display: grid; grid-template-columns: 22px 1fr 70px 56px; gap: 10px; align-items: center; padding: 7px 8px; border-radius: 7px; color: var(--text-2); }
-  .row.sel { background: var(--accent-soft); color: var(--text); }
-  .row svg { width: 16px; height: 16px; color: var(--text-3); }
-  .row .n { color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .row.sel svg { color: var(--accent); }
-  .row .m, .row .s { font-size: 11px; color: var(--text-3); text-align: right; }
-  .status { margin-top: auto; height: 26px; border-top: 1px solid var(--line); display: flex; align-items: center; padding: 0 12px; gap: 6px; font-size: 10.5px; color: var(--text-3); }
+  /* Screenshots in a window frame; the app leaves room for the traffic lights, the page draws them. */
+  .shot { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid var(--line-2); box-shadow: var(--shadow); background: var(--bg-2); }
+  .shot img { display: block; width: 100%; height: auto; }
+  .shot .light { position: absolute; top: 3.61%; width: 1.07%; aspect-ratio: 1 / 1; border-radius: 50%; transform: translate(-50%, -50%); }
+  .shot .light.r { left: 1.7%; background: var(--mac-red); } .shot .light.y { left: 3.75%; background: var(--mac-yel); } .shot .light.g { left: 5.8%; background: var(--mac-grn); }
+  .hero-shot { transform: perspective(1400px) rotateY(-6deg) rotateX(2deg); transition: transform .5s ease; }
+  .hero-shot:hover { transform: none; }
+  .gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 36px; }
+  .gallery figure { margin: 0; }
+  .gallery figcaption { padding: 14px 6px 0; }
+  .gallery h3 { margin: 0 0 4px; font-size: 16px; }
+  .gallery p { margin: 0; font-size: 14px; color: var(--text-2); }
+  .gallery .wide { grid-column: 1 / -1; }
   /* Sections */
   section { padding: 72px 0; }
   .kicker { color: var(--accent); font-weight: 700; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; }
@@ -128,13 +116,14 @@
   .step p { margin: 0; color: var(--text-2); font-size: 14px; }
   @media (max-width: 900px) {
     .hero { grid-template-columns: 1fr; padding-top: 56px; }
-    .mock { transform: none; height: 360px; grid-template-columns: 140px 1fr; }
+    .hero-shot { transform: none; }
+    .gallery { grid-template-columns: 1fr; }
     .three, .steps, .stats { grid-template-columns: 1fr; }
     .grid { grid-template-columns: 1fr 1fr; }
     .oss { grid-template-columns: 1fr; padding: 28px; }
     nav .links a.hide-sm { display: none; }
   }
-  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } .mock { grid-template-columns: 1fr; } .mock .side { display: none; } }
+  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -155,7 +144,7 @@
   <section class="hero" id="download">
     <div>
       <span class="eyebrow" data-i18n="hero.eyebrow">macOS · Windows · Free and open source</span>
-      <h1 data-i18n-html="hero.title">Remember your NAS <em>once</em>.<br>Open it forever.</h1>
+      <h1 data-i18n-html="hero.title">Always forgetting your NAS address, user name and password?<br>With Neat NAS you remember them <em>once</em>.</h1>
       <p class="lead" data-i18n="hero.lead">The lightest NAS file browser for Mac and Windows. Save the address, user name and password a single time. From then on, every launch opens straight into your files.</p>
       <div class="cta">
         <a class="btn primary" id="dl-mac" href="https://github.com/jason-jm/neat-nas/releases/latest">
@@ -169,28 +158,7 @@
       </div>
       <p class="fine"><span id="ver"></span><span data-i18n="cta.fine">Free · MIT license · about 10 MB · macOS 11+ and Windows 10/11 · </span><a href="https://github.com/jason-jm/neat-nas/releases" data-i18n="cta.all">all releases</a></p>
     </div>
-    <div class="mock" aria-hidden="true">
-      <div class="side">
-        <div class="dots"><i style="background:var(--mac-red)"></i><i style="background:var(--mac-yel)"></i><i style="background:var(--mac-grn)"></i></div>
-        <div class="nas">
-          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></svg></span>
-          <span><b data-i18n="mock.nas">Home NAS</b><small>192.168.1.126</small></span>
-          <span class="dot"></span>
-        </div>
-      </div>
-      <div class="main">
-        <div class="tb"><span>‹</span><span>›</span><span class="crumb" data-i18n="mock.folder">Photos</span><span class="search">🔍 <span data-i18n="mock.filter">Filter files…</span></span><span class="pill" data-i18n="mock.download">Download</span></div>
-        <div class="rows">
-          <div class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="n">2026 · Kyoto</span><span class="m">Sep 12</span><span class="s">—</span></div>
-          <div class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="n">Family</span><span class="m">Aug 30</span><span class="s">—</span></div>
-          <div class="row sel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg><span class="n">IMG_4821.heic</span><span class="m">Sep 19</span><span class="s">3.2 MB</span></div>
-          <div class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg><span class="n">IMG_4822.heic</span><span class="m">Sep 19</span><span class="s">2.9 MB</span></div>
-          <div class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 8-6 4 6 4z"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg><span class="n">Sunset.mov</span><span class="m">Sep 18</span><span class="s">412 MB</span></div>
-          <div class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span class="n">Itinerary.pdf</span><span class="m">Sep 10</span><span class="s">84 KB</span></div>
-        </div>
-        <div class="status"><span data-i18n="mock.status">6 items · connected over SMB 3.1.1</span></div>
-      </div>
-    </div>
+    <div class="shot hero-shot"><img data-shot="grid" alt="Neat NAS browsing a photo folder on a NAS"><i class="light r"></i><i class="light y"></i><i class="light g"></i></div>
   </section>
 
   <section>
@@ -218,15 +186,27 @@
       <div class="f"><div class="i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><h3 data-i18n="f8.h">Updates itself, safely</h3><p data-i18n="f8.p">New versions show up in Settings and install in one click, verified with a signature before anything runs.</p></div>
     </div>
   </section>
+  <section id="screens">
+    <span class="kicker" data-i18n="gallery.kicker">See it in action</span>
+    <h2 data-i18n="gallery.title">The whole app, at a glance</h2>
+    <div class="gallery">
+      <figure class="wide"><div class="shot"><img data-shot="quicklook" alt="Quick Look of a photo"><i class="light r"></i><i class="light y"></i><i class="light g"></i></div><figcaption><h3 data-i18n="g1.h">Quick Look</h3><p data-i18n="g1.p">Space opens photos, video, PDF and text straight from the NAS; the arrow keys walk through the folder.</p></figcaption></figure>
+      <figure><div class="shot"><img data-shot="list" alt="Folder listing"><i class="light r"></i><i class="light y"></i><i class="light g"></i></div><figcaption><h3 data-i18n="g2.h">Folders that load instantly</h3><p data-i18n="g2.p">List or grid, sortable, with a search box that filters as you type.</p></figcaption></figure>
+      <figure><div class="shot"><img data-shot="transfers" alt="Transfers popover"><i class="light r"></i><i class="light y"></i><i class="light g"></i></div><figcaption><h3 data-i18n="g3.h">Transfers you can trust</h3><p data-i18n="g3.p">Progress, pause and resume in a small popover; interrupted transfers pick up where they left off.</p></figcaption></figure>
+      <figure><div class="shot"><img data-shot="discover" alt="Add NAS dialog with discovered servers"><i class="light r"></i><i class="light y"></i><i class="light g"></i></div><figcaption><h3 data-i18n="g4.h">Your NAS finds you</h3><p data-i18n="g4.p">The add dialog lists every SMB server on the network: pick one, enter the password once, done.</p></figcaption></figure>
+      <figure><div class="shot"><img data-shot="settings" alt="Settings"><i class="light r"></i><i class="light y"></i><i class="light g"></i></div><figcaption><h3 data-i18n="g5.h">Settings that fit on one screen</h3><p data-i18n="g5.p">Download folder, double-click behaviour, appearance, language and one-click updates.</p></figcaption></figure>
+    </div>
+  </section>
+
 
   <section>
-    <span class="kicker" data-i18n="light.kicker">Built light</span>
-    <h2 data-i18n="light.title">Native core, system web view, no Electron</h2>
-    <p class="sub" data-i18n="light.sub">Neat NAS speaks SMB 2 and 3 through a pure-Rust client and draws its interface in the web view your OS already ships. Nothing is mounted and nothing needs admin rights.</p>
+    <span class="kicker" data-i18n="light.kicker">Light and fast</span>
+    <h2 data-i18n="light.title">As quick as opening a folder</h2>
+    <p class="sub" data-i18n="light.sub">Installs in seconds, launches without a wait, and then stays out of your way: it never slows your computer down or hogs memory.</p>
     <div class="stats">
-      <div class="stat"><b>~10 MB</b><span data-i18n="stat.size">to download, not 200</span></div>
-      <div class="stat"><b>&lt; 1 s</b><span data-i18n="stat.launch">from launch to your files</span></div>
-      <div class="stat"><b>0</b><span data-i18n="stat.mounts">drive letters, mounts or admin prompts</span></div>
+      <div class="stat"><b>~10 MB</b><span data-i18n="stat.size">to download; installed in seconds</span></div>
+      <div class="stat"><b>&lt; 1 s</b><span data-i18n="stat.launch">from clicking the icon to seeing your files</span></div>
+      <div class="stat"><b>0</b><span data-i18n="stat.mounts">waiting for mounts, drive letters or admin prompts</span></div>
     </div>
   </section>
 
@@ -267,7 +247,7 @@ const I18N = {
   "zh-CN": { name: "简体中文",
     "nav.features": "功能", "nav.download": "下载",
     "hero.eyebrow": "macOS · Windows · 免费开源",
-    "hero.title": "NAS 的地址、账号、密码，<em>只记一次</em>。<br>以后每次打开就是文件。",
+    "hero.title": "总是忘记 NAS 的地址、账号、密码？<br>在 Neat NAS，<em>只需记一次</em>。",
     "hero.lead": "最轻量的 NAS 文件浏览器，Mac 和 Windows 双平台。地址、用户名、密码保存一次，之后每次启动直接进入你的文件。",
     "cta.mac": "下载 macOS 版", "cta.win": "下载 Windows 版", "cta.fine": "免费 · MIT 协议 · 约 10 MB · macOS 11+ 与 Windows 10/11 · ", "cta.all": "全部版本",
     "mock.nas": "家里的 NAS", "mock.folder": "照片", "mock.filter": "筛选文件…", "mock.download": "下载", "mock.status": "6 个项目 · 通过 SMB 3.1.1 连接",
@@ -284,18 +264,18 @@ const I18N = {
     "f6.h": "秒开的照片网格", "f6.p": "缩略图用的是相机内嵌在每张照片里的预览，RAW 和 HEIC 文件夹只需读文件头。",
     "f7.h": "十种语言，两种主题", "f7.p": "浅色和深色跟随系统。界面支持中、英、日、韩、德、西、法、葡、俄语。",
     "f8.h": "自动安全更新", "f8.p": "新版本出现在设置里，一键安装，运行前先验证签名。",
-    "light.kicker": "生来轻量", "light.title": "原生内核，系统自带 WebView，没有 Electron",
-    "light.sub": "Neat NAS 用纯 Rust 客户端直接讲 SMB 2/3，界面画在系统自带的 WebView 上。不挂载任何东西，不需要管理员权限。",
-    "stat.size": "下载体积，而不是 200 MB", "stat.launch": "从启动到看见文件", "stat.mounts": "个盘符、挂载或管理员提示",
+    "light.kicker": "又轻又快", "light.title": "像打开一个文件夹一样快",
+    "light.sub": "安装只要几秒，启动不用等，用完就退到一边：不拖慢电脑，也不占内存。",
+    "stat.size": "下载体积，几秒装好", "stat.launch": "从点开图标到看见文件", "stat.mounts": "次等待挂载、盘符或管理员弹窗",
     "how.kicker": "开始使用", "how.title": "设置一次，不到一分钟",
     "s1.h": "安装", "s1.p": "macOS 打开 .dmg，Windows 运行安装器，不需要管理员权限。",
     "s2.h": "选择你的 NAS", "s2.p": "通常已经列出来了。输入一次用户名和密码，它们会进入钥匙串。",
     "s3.h": "完成", "s3.p": "从现在起，打开 Neat NAS 就等于打开你的文件。",
-    "oss.kicker": "开源", "oss.title": "MIT 协议。欢迎 Star、Fork 和翻译。", "oss.sub": "Neat NAS 用 Rust、Tauri 和 React 构建，每一行代码都在 GitHub 上。欢迎提交问题、翻译和 PR。", "oss.btn": "在 GitHub 上查看", "oss.issue": "反馈问题" },
+    "oss.kicker": "开源", "oss.title": "MIT 协议。欢迎 Star、Fork 和翻译。", "oss.sub": "Neat NAS 用 Rust、Tauri 和 React 构建，每一行代码都在 GitHub 上。欢迎提交问题、翻译和 PR。", "oss.btn": "在 GitHub 上查看", "oss.issue": "反馈问题", "gallery.kicker": "看看实际效果", "gallery.title": "整个应用，一眼看完", "g1.h": "快速预览", "g1.p": "按空格直接从 NAS 打开照片、视频、PDF 和文本，左右键翻看整个文件夹。", "g2.h": "秒开的文件夹", "g2.p": "列表或网格，可排序，搜索框边打字边筛选。", "g3.h": "放心的传输", "g3.p": "进度、暂停、继续都在一个小面板里，中断的传输从断点接着传。", "g4.h": "NAS 自己找上门", "g4.p": "添加对话框列出局域网里所有 SMB 服务器，选一个，输一次密码，完事。", "g5.h": "一屏放下的设置", "g5.p": "下载文件夹、双击行为、外观、语言和一键更新。" },
   "zh-TW": { name: "繁體中文",
     "nav.features": "功能", "nav.download": "下載",
     "hero.eyebrow": "macOS · Windows · 免費開源",
-    "hero.title": "NAS 的位址、帳號、密碼，<em>只記一次</em>。<br>之後每次開啟就是檔案。",
+    "hero.title": "總是忘記 NAS 的位址、帳號、密碼？<br>在 Neat NAS，<em>只需記一次</em>。",
     "hero.lead": "最輕量的 NAS 檔案瀏覽器，Mac 與 Windows 雙平台。位址、使用者名稱、密碼儲存一次，之後每次啟動直接進入你的檔案。",
     "cta.mac": "下載 macOS 版", "cta.win": "下載 Windows 版", "cta.fine": "免費 · MIT 授權 · 約 10 MB · macOS 11+ 與 Windows 10/11 · ", "cta.all": "所有版本",
     "mock.nas": "家裡的 NAS", "mock.folder": "照片", "mock.filter": "篩選檔案…", "mock.download": "下載", "mock.status": "6 個項目 · 透過 SMB 3.1.1 連線",
@@ -312,18 +292,18 @@ const I18N = {
     "f6.h": "秒開的照片格狀檢視", "f6.p": "縮圖使用相機內嵌在每張照片裡的預覽，RAW 和 HEIC 資料夾只需讀取檔頭。",
     "f7.h": "十種語言，兩種主題", "f7.p": "淺色和深色跟隨系統。介面支援中、英、日、韓、德、西、法、葡、俄語。",
     "f8.h": "自動安全更新", "f8.p": "新版本出現在設定裡，一鍵安裝，執行前先驗證簽章。",
-    "light.kicker": "天生輕量", "light.title": "原生核心，系統內建 WebView，沒有 Electron",
-    "light.sub": "Neat NAS 以純 Rust 用戶端直接說 SMB 2/3，介面畫在系統內建的 WebView 上。不掛載任何東西，不需要管理員權限。",
-    "stat.size": "下載大小，而不是 200 MB", "stat.launch": "從啟動到看見檔案", "stat.mounts": "個磁碟代號、掛載或管理員提示",
+    "light.kicker": "又輕又快", "light.title": "像開啟一個資料夾一樣快",
+    "light.sub": "安裝只要幾秒，啟動不用等，用完就退到一旁：不拖慢電腦，也不佔記憶體。",
+    "stat.size": "下載大小，幾秒裝好", "stat.launch": "從點開圖示到看見檔案", "stat.mounts": "次等待掛載、磁碟代號或管理員視窗",
     "how.kicker": "開始使用", "how.title": "設定一次，不到一分鐘",
     "s1.h": "安裝", "s1.p": "macOS 開啟 .dmg，Windows 執行安裝程式，不需要管理員權限。",
     "s2.h": "選擇你的 NAS", "s2.p": "通常已經列出來了。輸入一次使用者名稱和密碼，它們會進入鑰匙圈。",
     "s3.h": "完成", "s3.p": "從現在起，開啟 Neat NAS 就等於開啟你的檔案。",
-    "oss.kicker": "開源", "oss.title": "MIT 授權。歡迎 Star、Fork 和翻譯。", "oss.sub": "Neat NAS 以 Rust、Tauri 和 React 打造，每一行程式碼都在 GitHub 上。歡迎回報問題、翻譯和 PR。", "oss.btn": "在 GitHub 上查看", "oss.issue": "回報問題" },
+    "oss.kicker": "開源", "oss.title": "MIT 授權。歡迎 Star、Fork 和翻譯。", "oss.sub": "Neat NAS 以 Rust、Tauri 和 React 打造，每一行程式碼都在 GitHub 上。歡迎回報問題、翻譯和 PR。", "oss.btn": "在 GitHub 上查看", "oss.issue": "回報問題", "gallery.kicker": "看看實際效果", "gallery.title": "整個應用程式，一眼看完", "g1.h": "快速查看", "g1.p": "按空白鍵直接從 NAS 開啟照片、影片、PDF 和文字，左右鍵翻看整個資料夾。", "g2.h": "秒開的資料夾", "g2.p": "列表或格狀，可排序，搜尋框邊打字邊篩選。", "g3.h": "放心的傳輸", "g3.p": "進度、暫停、繼續都在一個小面板裡，中斷的傳輸從斷點接著傳。", "g4.h": "NAS 自己找上門", "g4.p": "新增對話框列出區域網路裡所有 SMB 伺服器，選一個，輸入一次密碼，完成。", "g5.h": "一個畫面放得下的設定", "g5.p": "下載資料夾、雙擊行為、外觀、語言和一鍵更新。" },
   ja: { name: "日本語",
     "nav.features": "機能", "nav.download": "ダウンロード",
     "hero.eyebrow": "macOS · Windows · 無料・オープンソース",
-    "hero.title": "NAS の登録は<em>一度だけ</em>。<br>あとは開けばファイルがそこに。",
+    "hero.title": "NAS のアドレス・ユーザー名・パスワード、いつも忘れていませんか？<br>Neat NAS なら、覚えるのは<em>一度だけ</em>。",
     "hero.lead": "Mac と Windows で使える、いちばん軽い NAS ファイルブラウザ。アドレス・ユーザー名・パスワードを一度保存すれば、起動するたびにすぐファイルが開きます。",
     "cta.mac": "macOS 版をダウンロード", "cta.win": "Windows 版をダウンロード", "cta.fine": "無料 · MIT ライセンス · 約 10 MB · macOS 11 以降 / Windows 10/11 · ", "cta.all": "すべてのリリース",
     "mock.nas": "自宅の NAS", "mock.folder": "写真", "mock.filter": "ファイルを絞り込む…", "mock.download": "ダウンロード", "mock.status": "6 項目 · SMB 3.1.1 で接続中",
@@ -340,18 +320,18 @@ const I18N = {
     "f6.h": "一瞬で並ぶ写真グリッド", "f6.p": "サムネイルはカメラが写真に埋め込んだプレビューを利用。RAW や HEIC のフォルダもヘッダーを読むだけ。",
     "f7.h": "10 言語、2 つのテーマ", "f7.p": "ライトとダークはシステムに追従。日本語、英語、中国語、韓国語、ドイツ語、スペイン語、フランス語、ポルトガル語、ロシア語に対応。",
     "f8.h": "安全な自動アップデート", "f8.p": "新しいバージョンは設定に表示され、ワンクリックでインストール。実行前に署名を検証します。",
-    "light.kicker": "軽さが身上", "light.title": "ネイティブのコアとシステムの WebView。Electron なし",
-    "light.sub": "Neat NAS は純 Rust 製クライアントで SMB 2/3 を直接話し、OS 標準の WebView に画面を描きます。何もマウントせず、管理者権限も不要です。",
-    "stat.size": "ダウンロードサイズ。200 MB ではなく", "stat.launch": "起動からファイル表示まで", "stat.mounts": "ドライブ文字・マウント・管理者ダイアログ",
+    "light.kicker": "軽くて速い", "light.title": "フォルダを開くのと同じ速さ",
+    "light.sub": "インストールは数秒、起動は待ち時間なし、使わないときは静かに脇へ。パソコンを重くせず、メモリも食いません。",
+    "stat.size": "のダウンロード、数秒でインストール", "stat.launch": "アイコンを押してからファイルが見えるまで", "stat.mounts": "回のマウント待ち、ドライブ文字、管理者ダイアログ",
     "how.kicker": "はじめかた", "how.title": "設定は一度だけ、1 分以内",
     "s1.h": "インストール", "s1.p": "macOS は .dmg を開き、Windows はインストーラーを実行。管理者権限は不要です。",
     "s2.h": "NAS を選ぶ", "s2.p": "たいてい一覧にもう並んでいます。ユーザー名とパスワードを一度入力すると、キーチェーンに保存されます。",
     "s3.h": "これだけ", "s3.p": "これからは Neat NAS を開く＝ファイルを開く、です。",
-    "oss.kicker": "オープンソース", "oss.title": "MIT ライセンス。Star、Fork、翻訳を歓迎します。", "oss.sub": "Neat NAS は Rust、Tauri、React で作られ、すべてのコードが GitHub にあります。バグ報告、翻訳、プルリクエストをお待ちしています。", "oss.btn": "GitHub で見る", "oss.issue": "バグを報告" },
+    "oss.kicker": "オープンソース", "oss.title": "MIT ライセンス。Star、Fork、翻訳を歓迎します。", "oss.sub": "Neat NAS は Rust、Tauri、React で作られ、すべてのコードが GitHub にあります。バグ報告、翻訳、プルリクエストをお待ちしています。", "oss.btn": "GitHub で見る", "oss.issue": "バグを報告", "gallery.kicker": "実際の画面", "gallery.title": "アプリの全体を、ひと目で", "g1.h": "クイックルック", "g1.p": "スペースキーで写真・動画・PDF・テキストを NAS から直接開き、矢印キーでフォルダ内を移動。", "g2.h": "一瞬で開くフォルダ", "g2.p": "リストでもグリッドでも、並べ替えでき、検索欄は入力と同時に絞り込み。", "g3.h": "安心して任せられる転送", "g3.p": "進捗・一時停止・再開が小さなパネルに。中断した転送は途中から再開。", "g4.h": "NAS のほうから見つかる", "g4.p": "追加ダイアログにネットワーク上の SMB サーバーがすべて並びます。選んでパスワードを一度入れるだけ。", "g5.h": "一画面に収まる設定", "g5.p": "ダウンロード先、ダブルクリックの動作、外観、言語、ワンクリック更新。" },
   ko: { name: "한국어",
     "nav.features": "기능", "nav.download": "다운로드",
     "hero.eyebrow": "macOS · Windows · 무료 오픈소스",
-    "hero.title": "NAS는 <em>한 번만</em> 기억하세요.<br>그다음부터는 열면 바로 파일입니다.",
+    "hero.title": "NAS 주소, 계정, 비밀번호를 늘 잊어버리시나요?<br>Neat NAS에서는 <em>한 번만</em> 기억하면 됩니다.",
     "hero.lead": "Mac과 Windows를 위한 가장 가벼운 NAS 파일 브라우저. 주소, 사용자 이름, 비밀번호를 한 번만 저장하면 실행할 때마다 곧바로 파일이 열립니다.",
     "cta.mac": "macOS용 다운로드", "cta.win": "Windows용 다운로드", "cta.fine": "무료 · MIT 라이선스 · 약 10 MB · macOS 11+ 및 Windows 10/11 · ", "cta.all": "모든 릴리스",
     "mock.nas": "집 NAS", "mock.folder": "사진", "mock.filter": "파일 필터…", "mock.download": "다운로드", "mock.status": "6개 항목 · SMB 3.1.1로 연결됨",
@@ -368,18 +348,18 @@ const I18N = {
     "f6.h": "즉시 뜨는 사진 격자", "f6.p": "카메라가 사진마다 넣어 둔 미리보기를 썸네일로 쓰기 때문에 RAW와 HEIC 폴더도 파일 헤더만 읽습니다.",
     "f7.h": "10개 언어, 2가지 테마", "f7.p": "라이트와 다크는 시스템을 따릅니다. 한국어, 영어, 중국어, 일본어, 독일어, 스페인어, 프랑스어, 포르투갈어, 러시아어를 지원합니다.",
     "f8.h": "안전한 자동 업데이트", "f8.p": "새 버전은 설정에 나타나고 클릭 한 번으로 설치되며, 실행 전에 서명을 검증합니다.",
-    "light.kicker": "가볍게 만들었습니다", "light.title": "네이티브 코어, 시스템 웹뷰, Electron 없음",
-    "light.sub": "Neat NAS는 순수 Rust 클라이언트로 SMB 2/3를 직접 사용하고, OS에 이미 있는 웹뷰에 화면을 그립니다. 아무것도 마운트하지 않고 관리자 권한도 필요 없습니다.",
-    "stat.size": "다운로드 크기, 200 MB가 아닌", "stat.launch": "실행부터 파일 표시까지", "stat.mounts": "드라이브 문자, 마운트, 관리자 프롬프트",
+    "light.kicker": "가볍고 빠르게", "light.title": "폴더 하나 여는 것만큼 빠릅니다",
+    "light.sub": "설치는 몇 초, 실행은 기다림 없이, 안 쓸 때는 조용히 물러납니다. 컴퓨터를 느리게 하지도, 메모리를 차지하지도 않습니다.",
+    "stat.size": "다운로드, 몇 초면 설치", "stat.launch": "아이콘 클릭부터 파일이 보일 때까지", "stat.mounts": "번의 마운트 대기, 드라이브 문자, 관리자 창",
     "how.kicker": "시작하기", "how.title": "설정은 한 번, 1분이면 충분",
     "s1.h": "설치", "s1.p": "macOS는 .dmg를 열고 Windows는 설치 파일을 실행하세요. 관리자 권한이 필요 없습니다.",
     "s2.h": "NAS 선택", "s2.p": "대개 이미 목록에 있습니다. 사용자 이름과 비밀번호를 한 번 입력하면 키체인에 저장됩니다.",
     "s3.h": "끝", "s3.p": "이제 Neat NAS를 여는 것이 곧 파일을 여는 것입니다.",
-    "oss.kicker": "오픈소스", "oss.title": "MIT 라이선스. Star, Fork, 번역을 환영합니다.", "oss.sub": "Neat NAS는 Rust, Tauri, React로 만들어졌고 모든 코드가 GitHub에 있습니다. 버그 신고, 번역, PR을 환영합니다.", "oss.btn": "GitHub에서 보기", "oss.issue": "버그 신고" },
+    "oss.kicker": "오픈소스", "oss.title": "MIT 라이선스. Star, Fork, 번역을 환영합니다.", "oss.sub": "Neat NAS는 Rust, Tauri, React로 만들어졌고 모든 코드가 GitHub에 있습니다. 버그 신고, 번역, PR을 환영합니다.", "oss.btn": "GitHub에서 보기", "oss.issue": "버그 신고", "gallery.kicker": "실제 화면", "gallery.title": "앱 전체를 한눈에", "g1.h": "훑어보기", "g1.p": "스페이스 키로 사진, 동영상, PDF, 텍스트를 NAS에서 바로 열고, 화살표로 폴더를 넘깁니다.", "g2.h": "즉시 열리는 폴더", "g2.p": "목록이든 격자든 정렬할 수 있고, 검색창은 입력하는 대로 걸러 줍니다.", "g3.h": "믿을 수 있는 전송", "g3.p": "진행률, 일시 정지, 재개가 작은 패널 하나에. 끊긴 전송은 멈춘 곳부터 이어집니다.", "g4.h": "NAS가 먼저 찾아옵니다", "g4.p": "추가 대화상자에 네트워크의 모든 SMB 서버가 나열됩니다. 하나 고르고 비밀번호를 한 번 입력하면 끝.", "g5.h": "한 화면에 담긴 설정", "g5.p": "다운로드 폴더, 두 번 클릭 동작, 모양, 언어, 원클릭 업데이트." },
   de: { name: "Deutsch",
     "nav.features": "Funktionen", "nav.download": "Download",
     "hero.eyebrow": "macOS · Windows · Kostenlos und Open Source",
-    "hero.title": "Dein NAS <em>einmal</em> merken.<br>Für immer offen.",
+    "hero.title": "Vergisst du ständig Adresse, Benutzername und Passwort deines NAS?<br>Mit Neat NAS merkst du sie dir <em>einmal</em>.",
     "hero.lead": "Der leichteste NAS-Dateibrowser für Mac und Windows. Adresse, Benutzername und Passwort ein einziges Mal speichern. Danach öffnet jeder Start direkt deine Dateien.",
     "cta.mac": "Für macOS laden", "cta.win": "Für Windows laden", "cta.fine": "Kostenlos · MIT-Lizenz · etwa 10 MB · macOS 11+ und Windows 10/11 · ", "cta.all": "alle Versionen",
     "mock.nas": "NAS zu Hause", "mock.folder": "Fotos", "mock.filter": "Dateien filtern …", "mock.download": "Laden", "mock.status": "6 Objekte · verbunden über SMB 3.1.1",
@@ -396,18 +376,18 @@ const I18N = {
     "f6.h": "Fotoraster in Sekundenbruchteilen", "f6.p": "Miniaturen nutzen die Vorschau, die Kameras in jedes Foto einbetten. RAW- und HEIC-Ordner brauchen nur die Dateiköpfe.",
     "f7.h": "Zehn Sprachen, zwei Themen", "f7.p": "Hell und Dunkel folgen dem System. Die Oberfläche spricht Deutsch, Englisch, Chinesisch, Japanisch, Koreanisch, Spanisch, Französisch, Portugiesisch und Russisch.",
     "f8.h": "Aktualisiert sich sicher selbst", "f8.p": "Neue Versionen erscheinen in den Einstellungen und werden mit einem Klick installiert, signiert und geprüft.",
-    "light.kicker": "Leicht gebaut", "light.title": "Nativer Kern, System-Webview, kein Electron",
-    "light.sub": "Neat NAS spricht SMB 2 und 3 über einen reinen Rust-Client und zeichnet seine Oberfläche in der Webview, die dein System ohnehin mitbringt. Nichts wird gemountet, nichts braucht Adminrechte.",
-    "stat.size": "zum Herunterladen, nicht 200", "stat.launch": "vom Start zu deinen Dateien", "stat.mounts": "Laufwerksbuchstaben, Mounts oder Admin-Abfragen",
+    "light.kicker": "Leicht und schnell", "light.title": "So schnell wie das Öffnen eines Ordners",
+    "light.sub": "In Sekunden installiert, ohne Wartezeit gestartet, und danach hält es sich zurück: Es bremst deinen Rechner nicht und belegt keinen Speicher.",
+    "stat.size": "zum Herunterladen, in Sekunden installiert", "stat.launch": "vom Klick auf das Symbol bis zu deinen Dateien", "stat.mounts": "Warten auf Mounts, Laufwerksbuchstaben oder Admin-Abfragen",
     "how.kicker": "Loslegen", "how.title": "Einmal einrichten, in unter einer Minute",
     "s1.h": "Installieren", "s1.p": "Auf dem Mac die .dmg öffnen, unter Windows das Setup ausführen. Keine Adminrechte nötig.",
     "s2.h": "NAS auswählen", "s2.p": "Meist steht es schon in der Liste. Benutzername und Passwort einmal eingeben, sie wandern in den Schlüsselbund.",
     "s3.h": "Fertig", "s3.p": "Ab jetzt heißt Neat NAS öffnen: deine Dateien öffnen.",
-    "oss.kicker": "Open Source", "oss.title": "MIT-lizenziert. Stern vergeben, forken, übersetzen.", "oss.sub": "Neat NAS ist mit Rust, Tauri und React gebaut, jede Zeile liegt auf GitHub. Fehlerberichte, Übersetzungen und Pull Requests sind willkommen.", "oss.btn": "Auf GitHub ansehen", "oss.issue": "Fehler melden" },
+    "oss.kicker": "Open Source", "oss.title": "MIT-lizenziert. Stern vergeben, forken, übersetzen.", "oss.sub": "Neat NAS ist mit Rust, Tauri und React gebaut, jede Zeile liegt auf GitHub. Fehlerberichte, Übersetzungen und Pull Requests sind willkommen.", "oss.btn": "Auf GitHub ansehen", "oss.issue": "Fehler melden", "gallery.kicker": "In Aktion", "gallery.title": "Die ganze App auf einen Blick", "g1.h": "Übersicht", "g1.p": "Die Leertaste öffnet Fotos, Video, PDF und Text direkt vom NAS; die Pfeiltasten blättern durch den Ordner.", "g2.h": "Ordner, die sofort da sind", "g2.p": "Liste oder Raster, sortierbar, mit einem Suchfeld, das beim Tippen filtert.", "g3.h": "Übertragungen, auf die Verlass ist", "g3.p": "Fortschritt, Pause und Fortsetzen in einem kleinen Fenster; unterbrochene Übertragungen machen dort weiter, wo sie waren.", "g4.h": "Dein NAS findet dich", "g4.p": "Der Dialog listet jeden SMB-Server im Netzwerk: einen auswählen, Passwort einmal eingeben, fertig.", "g5.h": "Einstellungen auf einer Seite", "g5.p": "Download-Ordner, Doppelklick-Verhalten, Erscheinungsbild, Sprache und Updates mit einem Klick." },
   es: { name: "Español",
     "nav.features": "Funciones", "nav.download": "Descargar",
     "hero.eyebrow": "macOS · Windows · Gratis y de código abierto",
-    "hero.title": "Recuerda tu NAS <em>una vez</em>.<br>Ábrelo para siempre.",
+    "hero.title": "¿Siempre olvidas la dirección, el usuario y la contraseña de tu NAS?<br>Con Neat NAS los recuerdas <em>una vez</em>.",
     "hero.lead": "El explorador de archivos NAS más ligero para Mac y Windows. Guarda la dirección, el usuario y la contraseña una sola vez. Desde entonces, cada inicio abre directamente tus archivos.",
     "cta.mac": "Descargar para macOS", "cta.win": "Descargar para Windows", "cta.fine": "Gratis · licencia MIT · unos 10 MB · macOS 11+ y Windows 10/11 · ", "cta.all": "todas las versiones",
     "mock.nas": "NAS de casa", "mock.folder": "Fotos", "mock.filter": "Filtrar archivos…", "mock.download": "Descargar", "mock.status": "6 elementos · conectado por SMB 3.1.1",
@@ -424,18 +404,18 @@ const I18N = {
     "f6.h": "Cuadrículas de fotos al instante", "f6.p": "Las miniaturas usan la vista previa que la cámara incrusta en cada foto: las carpetas RAW y HEIC solo necesitan las cabeceras.",
     "f7.h": "Diez idiomas, dos temas", "f7.p": "Claro y oscuro siguen al sistema. La interfaz habla español, inglés, chino, japonés, coreano, alemán, francés, portugués y ruso.",
     "f8.h": "Se actualiza sola, con seguridad", "f8.p": "Las versiones nuevas aparecen en Ajustes y se instalan con un clic, con la firma verificada antes de ejecutar nada.",
-    "light.kicker": "Ligero por diseño", "light.title": "Núcleo nativo, web view del sistema, sin Electron",
-    "light.sub": "Neat NAS habla SMB 2 y 3 con un cliente escrito en Rust y dibuja su interfaz en el web view que ya trae tu sistema. No monta nada ni pide permisos de administrador.",
-    "stat.size": "de descarga, no 200", "stat.launch": "del inicio a tus archivos", "stat.mounts": "letras de unidad, montajes o avisos de administrador",
+    "light.kicker": "Ligero y rápido", "light.title": "Tan rápido como abrir una carpeta",
+    "light.sub": "Se instala en segundos, arranca sin esperas y luego no molesta: no ralentiza el ordenador ni acapara memoria.",
+    "stat.size": "de descarga; instalado en segundos", "stat.launch": "desde el clic en el icono hasta ver tus archivos", "stat.mounts": "esperas por montajes, letras de unidad o avisos de administrador",
     "how.kicker": "Primeros pasos", "how.title": "Configúralo una vez, en menos de un minuto",
     "s1.h": "Instala", "s1.p": "Abre el .dmg en macOS o ejecuta el instalador en Windows. Sin permisos de administrador.",
     "s2.h": "Elige tu NAS", "s2.p": "Normalmente ya está en la lista. Escribe usuario y contraseña una vez; van al llavero.",
     "s3.h": "Listo", "s3.p": "Desde ahora, abrir Neat NAS es abrir tus archivos.",
-    "oss.kicker": "Código abierto", "oss.title": "Licencia MIT. Dale una estrella, haz un fork, tradúcelo.", "oss.sub": "Neat NAS está hecho con Rust, Tauri y React, y cada línea está en GitHub. Se agradecen informes de errores, traducciones y pull requests.", "oss.btn": "Ver en GitHub", "oss.issue": "Informar de un error" },
+    "oss.kicker": "Código abierto", "oss.title": "Licencia MIT. Dale una estrella, haz un fork, tradúcelo.", "oss.sub": "Neat NAS está hecho con Rust, Tauri y React, y cada línea está en GitHub. Se agradecen informes de errores, traducciones y pull requests.", "oss.btn": "Ver en GitHub", "oss.issue": "Informar de un error", "gallery.kicker": "En acción", "gallery.title": "Toda la app, de un vistazo", "g1.h": "Vista rápida", "g1.p": "La barra espaciadora abre fotos, vídeo, PDF y texto directamente desde el NAS; las flechas recorren la carpeta.", "g2.h": "Carpetas que cargan al instante", "g2.p": "Lista o cuadrícula, ordenables, con un buscador que filtra mientras escribes.", "g3.h": "Transferencias de confianza", "g3.p": "Progreso, pausa y reanudación en un pequeño panel; las transferencias interrumpidas siguen donde se quedaron.", "g4.h": "Tu NAS te encuentra", "g4.p": "El diálogo de añadir lista todos los servidores SMB de la red: elige uno, escribe la contraseña una vez y listo.", "g5.h": "Ajustes que caben en una pantalla", "g5.p": "Carpeta de descargas, comportamiento del doble clic, apariencia, idioma y actualizaciones con un clic." },
   fr: { name: "Français",
     "nav.features": "Fonctions", "nav.download": "Télécharger",
     "hero.eyebrow": "macOS · Windows · Gratuit et open source",
-    "hero.title": "Retenez votre NAS <em>une fois</em>.<br>Ouvrez-le pour toujours.",
+    "hero.title": "Vous oubliez toujours l’adresse, l’identifiant et le mot de passe de votre NAS ?<br>Avec Neat NAS, vous les retenez <em>une seule fois</em>.",
     "hero.lead": "Le navigateur de fichiers NAS le plus léger pour Mac et Windows. Enregistrez l’adresse, le nom d’utilisateur et le mot de passe une seule fois. Ensuite, chaque lancement s’ouvre directement sur vos fichiers.",
     "cta.mac": "Télécharger pour macOS", "cta.win": "Télécharger pour Windows", "cta.fine": "Gratuit · licence MIT · environ 10 Mo · macOS 11+ et Windows 10/11 · ", "cta.all": "toutes les versions",
     "mock.nas": "NAS de la maison", "mock.folder": "Photos", "mock.filter": "Filtrer les fichiers…", "mock.download": "Télécharger", "mock.status": "6 éléments · connecté en SMB 3.1.1",
@@ -452,18 +432,18 @@ const I18N = {
     "f6.h": "Des grilles de photos instantanées", "f6.p": "Les vignettes utilisent l’aperçu que l’appareil photo intègre dans chaque image : les dossiers RAW et HEIC ne lisent que les en-têtes.",
     "f7.h": "Dix langues, deux thèmes", "f7.p": "Clair et sombre suivent le système. L’interface parle français, anglais, chinois, japonais, coréen, allemand, espagnol, portugais et russe.",
     "f8.h": "Se met à jour, en sécurité", "f8.p": "Les nouvelles versions apparaissent dans les Réglages et s’installent en un clic, signature vérifiée avant toute exécution.",
-    "light.kicker": "Léger par conception", "light.title": "Cœur natif, web view du système, pas d’Electron",
-    "light.sub": "Neat NAS parle SMB 2 et 3 via un client écrit en Rust et dessine son interface dans la web view que votre système fournit déjà. Rien n’est monté, aucun droit administrateur n’est requis.",
-    "stat.size": "à télécharger, pas 200", "stat.launch": "du lancement à vos fichiers", "stat.mounts": "lettre de lecteur, montage ou demande d’administrateur",
+    "light.kicker": "Léger et rapide", "light.title": "Aussi rapide qu’ouvrir un dossier",
+    "light.sub": "Installé en quelques secondes, lancé sans attente, puis il se fait oublier : il ne ralentit pas votre ordinateur et n’accapare pas la mémoire.",
+    "stat.size": "à télécharger, installé en quelques secondes", "stat.launch": "du clic sur l’icône à vos fichiers", "stat.mounts": "attente de montage, lettre de lecteur ou demande d’administrateur",
     "how.kicker": "Pour commencer", "how.title": "Une configuration, en moins d’une minute",
     "s1.h": "Installez", "s1.p": "Ouvrez le .dmg sur macOS ou lancez l’installeur sur Windows. Aucun droit administrateur nécessaire.",
     "s2.h": "Choisissez votre NAS", "s2.p": "Il est généralement déjà dans la liste. Saisissez nom d’utilisateur et mot de passe une fois ; ils rejoignent le trousseau.",
     "s3.h": "C’est tout", "s3.p": "Désormais, ouvrir Neat NAS, c’est ouvrir vos fichiers.",
-    "oss.kicker": "Open source", "oss.title": "Licence MIT. Une étoile, un fork, une traduction.", "oss.sub": "Neat NAS est construit avec Rust, Tauri et React, et chaque ligne est sur GitHub. Rapports de bugs, traductions et pull requests sont les bienvenus.", "oss.btn": "Voir sur GitHub", "oss.issue": "Signaler un bug" },
+    "oss.kicker": "Open source", "oss.title": "Licence MIT. Une étoile, un fork, une traduction.", "oss.sub": "Neat NAS est construit avec Rust, Tauri et React, et chaque ligne est sur GitHub. Rapports de bugs, traductions et pull requests sont les bienvenus.", "oss.btn": "Voir sur GitHub", "oss.issue": "Signaler un bug", "gallery.kicker": "En action", "gallery.title": "Toute l’app, d’un coup d’œil", "g1.h": "Coup d’œil", "g1.p": "La barre d’espace ouvre photos, vidéo, PDF et texte directement depuis le NAS ; les flèches parcourent le dossier.", "g2.h": "Des dossiers instantanés", "g2.p": "Liste ou grille, triables, avec un champ de recherche qui filtre à la frappe.", "g3.h": "Des transferts fiables", "g3.p": "Progression, pause et reprise dans un petit panneau ; un transfert interrompu reprend là où il s’est arrêté.", "g4.h": "Votre NAS vous trouve", "g4.p": "La fenêtre d’ajout liste tous les serveurs SMB du réseau : choisissez-en un, saisissez le mot de passe une fois, c’est fait.", "g5.h": "Des réglages qui tiennent sur un écran", "g5.p": "Dossier de téléchargement, comportement du double-clic, apparence, langue et mises à jour en un clic." },
   "pt-BR": { name: "Português",
     "nav.features": "Recursos", "nav.download": "Baixar",
     "hero.eyebrow": "macOS · Windows · Grátis e open source",
-    "hero.title": "Lembre do seu NAS <em>uma vez</em>.<br>Abra para sempre.",
+    "hero.title": "Sempre esquece o endereço, o usuário e a senha do seu NAS?<br>Com o Neat NAS você lembra <em>uma vez só</em>.",
     "hero.lead": "O navegador de arquivos NAS mais leve para Mac e Windows. Salve endereço, usuário e senha uma única vez. Daí em diante, cada abertura vai direto aos seus arquivos.",
     "cta.mac": "Baixar para macOS", "cta.win": "Baixar para Windows", "cta.fine": "Grátis · licença MIT · cerca de 10 MB · macOS 11+ e Windows 10/11 · ", "cta.all": "todas as versões",
     "mock.nas": "NAS de casa", "mock.folder": "Fotos", "mock.filter": "Filtrar arquivos…", "mock.download": "Baixar", "mock.status": "6 itens · conectado via SMB 3.1.1",
@@ -480,18 +460,18 @@ const I18N = {
     "f6.h": "Grades de fotos instantâneas", "f6.p": "As miniaturas usam a prévia que a câmera embute em cada foto: pastas RAW e HEIC só precisam dos cabeçalhos.",
     "f7.h": "Dez idiomas, dois temas", "f7.p": "Claro e escuro seguem o sistema. A interface fala português, inglês, chinês, japonês, coreano, alemão, espanhol, francês e russo.",
     "f8.h": "Atualiza sozinho, com segurança", "f8.p": "Versões novas aparecem nas Configurações e instalam com um clique, com assinatura verificada antes de rodar qualquer coisa.",
-    "light.kicker": "Leve por natureza", "light.title": "Núcleo nativo, web view do sistema, sem Electron",
-    "light.sub": "O Neat NAS fala SMB 2 e 3 com um cliente em Rust puro e desenha a interface na web view que o sistema já traz. Nada é montado e nada precisa de administrador.",
-    "stat.size": "de download, não 200", "stat.launch": "da abertura aos seus arquivos", "stat.mounts": "letras de unidade, montagens ou avisos de administrador",
+    "light.kicker": "Leve e rápido", "light.title": "Tão rápido quanto abrir uma pasta",
+    "light.sub": "Instala em segundos, abre sem espera e depois sai do caminho: não deixa o computador lento nem ocupa memória.",
+    "stat.size": "de download; instalado em segundos", "stat.launch": "do clique no ícone até ver seus arquivos", "stat.mounts": "esperas por montagem, letra de unidade ou aviso de administrador",
     "how.kicker": "Começando", "how.title": "Configure uma vez, em menos de um minuto",
     "s1.h": "Instale", "s1.p": "Abra o .dmg no macOS ou rode o instalador no Windows. Sem direitos de administrador.",
     "s2.h": "Escolha seu NAS", "s2.p": "Ele costuma já estar na lista. Digite usuário e senha uma vez; eles vão para as chaves do sistema.",
     "s3.h": "Pronto", "s3.p": "A partir de agora, abrir o Neat NAS é abrir seus arquivos.",
-    "oss.kicker": "Open source", "oss.title": "Licença MIT. Dê uma estrela, faça um fork, traduza.", "oss.sub": "O Neat NAS é feito com Rust, Tauri e React, e cada linha está no GitHub. Relatos de bugs, traduções e pull requests são bem-vindos.", "oss.btn": "Ver no GitHub", "oss.issue": "Relatar um bug" },
+    "oss.kicker": "Open source", "oss.title": "Licença MIT. Dê uma estrela, faça um fork, traduza.", "oss.sub": "O Neat NAS é feito com Rust, Tauri e React, e cada linha está no GitHub. Relatos de bugs, traduções e pull requests são bem-vindos.", "oss.btn": "Ver no GitHub", "oss.issue": "Relatar um bug", "gallery.kicker": "Em ação", "gallery.title": "O app inteiro, num relance", "g1.h": "Visualização Rápida", "g1.p": "A barra de espaço abre fotos, vídeo, PDF e texto direto do NAS; as setas percorrem a pasta.", "g2.h": "Pastas que abrem na hora", "g2.p": "Lista ou grade, com ordenação e uma busca que filtra enquanto você digita.", "g3.h": "Transferências confiáveis", "g3.p": "Progresso, pausa e retomada num painel pequeno; transferências interrompidas continuam de onde pararam.", "g4.h": "Seu NAS encontra você", "g4.p": "O diálogo de adicionar lista todos os servidores SMB da rede: escolha um, digite a senha uma vez, pronto.", "g5.h": "Configurações que cabem numa tela", "g5.p": "Pasta de downloads, comportamento do clique duplo, aparência, idioma e atualizações com um clique." },
   ru: { name: "Русский",
     "nav.features": "Возможности", "nav.download": "Скачать",
     "hero.eyebrow": "macOS · Windows · Бесплатно и с открытым кодом",
-    "hero.title": "Запомните NAS <em>один раз</em>.<br>Открывайте всегда.",
+    "hero.title": "Постоянно забываете адрес, логин и пароль своего NAS?<br>С Neat NAS их достаточно запомнить <em>один раз</em>.",
     "hero.lead": "Самый лёгкий файловый браузер для NAS на Mac и Windows. Сохраните адрес, имя пользователя и пароль один раз, и каждый запуск будет сразу открывать ваши файлы.",
     "cta.mac": "Скачать для macOS", "cta.win": "Скачать для Windows", "cta.fine": "Бесплатно · лицензия MIT · около 10 МБ · macOS 11+ и Windows 10/11 · ", "cta.all": "все версии",
     "mock.nas": "Домашний NAS", "mock.folder": "Фото", "mock.filter": "Фильтр файлов…", "mock.download": "Скачать", "mock.status": "6 объектов · подключено по SMB 3.1.1",
@@ -508,14 +488,14 @@ const I18N = {
     "f6.h": "Мгновенные сетки фото", "f6.p": "Миниатюры берутся из превью, которое камера встраивает в каждый снимок: папкам RAW и HEIC нужны только заголовки файлов.",
     "f7.h": "Десять языков, две темы", "f7.p": "Светлая и тёмная следуют за системой. Интерфейс на русском, английском, китайском, японском, корейском, немецком, испанском, французском и португальском.",
     "f8.h": "Безопасно обновляется сам", "f8.p": "Новые версии появляются в настройках и ставятся одним щелчком, подпись проверяется до запуска.",
-    "light.kicker": "Лёгкий по замыслу", "light.title": "Нативное ядро, системный WebView, без Electron",
-    "light.sub": "Neat NAS говорит на SMB 2 и 3 через клиент на чистом Rust и рисует интерфейс в WebView, который уже есть в системе. Ничего не монтируется, права администратора не нужны.",
-    "stat.size": "на скачивание, а не 200", "stat.launch": "от запуска до ваших файлов", "stat.mounts": "букв дисков, монтирований и запросов администратора",
+    "light.kicker": "Лёгкий и быстрый", "light.title": "Так же быстро, как открыть папку",
+    "light.sub": "Ставится за секунды, запускается без ожидания и не мешает: не тормозит компьютер и не занимает память.",
+    "stat.size": "на скачивание; установка за секунды", "stat.launch": "от щелчка по значку до ваших файлов", "stat.mounts": "ожиданий монтирования, букв дисков и окон администратора",
     "how.kicker": "Начало", "how.title": "Одна настройка, меньше минуты",
     "s1.h": "Установите", "s1.p": "Откройте .dmg на macOS или запустите установщик на Windows. Права администратора не нужны.",
     "s2.h": "Выберите NAS", "s2.p": "Обычно он уже в списке. Введите имя пользователя и пароль один раз, они попадут в связку ключей.",
     "s3.h": "Готово", "s3.p": "Теперь открыть Neat NAS значит открыть свои файлы.",
-    "oss.kicker": "Открытый код", "oss.title": "Лицензия MIT. Ставьте звезду, форкайте, переводите.", "oss.sub": "Neat NAS написан на Rust, Tauri и React, и каждая строка лежит на GitHub. Сообщения об ошибках, переводы и pull request приветствуются.", "oss.btn": "Открыть на GitHub", "oss.issue": "Сообщить об ошибке" },
+    "oss.kicker": "Открытый код", "oss.title": "Лицензия MIT. Ставьте звезду, форкайте, переводите.", "oss.sub": "Neat NAS написан на Rust, Tauri и React, и каждая строка лежит на GitHub. Сообщения об ошибках, переводы и pull request приветствуются.", "oss.btn": "Открыть на GitHub", "oss.issue": "Сообщить об ошибке", "gallery.kicker": "В деле", "gallery.title": "Всё приложение с одного взгляда", "g1.h": "Быстрый просмотр", "g1.p": "Пробел открывает фото, видео, PDF и текст прямо с NAS; стрелки листают папку.", "g2.h": "Папки открываются мгновенно", "g2.p": "Список или сетка, сортировка и поиск, который фильтрует по мере ввода.", "g3.h": "Передачи, на которые можно положиться", "g3.p": "Прогресс, пауза и продолжение в маленькой панели; прерванные передачи продолжаются с места остановки.", "g4.h": "NAS находит вас сам", "g4.p": "Окно добавления показывает все SMB-серверы в сети: выберите один, введите пароль один раз, готово.", "g5.h": "Настройки на одном экране", "g5.p": "Папка загрузок, действие двойного щелчка, оформление, язык и обновления в один щелчок." },
 };
 const EN = {};
 document.querySelectorAll("[data-i18n]").forEach(el => EN[el.dataset.i18n] = el.textContent);
@@ -529,6 +509,7 @@ function apply(code) {
   document.documentElement.lang = code;
   sel.value = code;
   try { localStorage.setItem("neatnas.site.lang", code); } catch (e) {}
+  paintShots();
 }
 function detect() {
   try { const s = localStorage.getItem("neatnas.site.lang"); if (s && I18N[s]) return s; } catch (e) {}
@@ -542,6 +523,14 @@ function detect() {
   return "en";
 }
 sel.addEventListener("change", () => apply(sel.value));
+// Screenshots: light/dark to match the page, Chinese UI for Chinese visitors.
+const SHOT_LANG = { "zh-CN": "zh-CN", "zh-TW": "zh-CN" };
+function paintShots() {
+  const dark = currentDark();
+  const l = SHOT_LANG[sel.value] || "en";
+  document.querySelectorAll("img[data-shot]").forEach(img => { img.src = `assets/screenshots/${l}/${img.dataset.shot}-${dark ? "dark" : "light"}.png`; });
+}
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => paintShots());
 // Light / dark: follows the system until the visitor picks one.
 const themeBtn = document.getElementById("theme");
 const systemDark = () => window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -551,6 +540,7 @@ themeBtn.addEventListener("click", () => {
   const next = currentDark() ? "light" : "dark";
   document.documentElement.dataset.theme = next;
   try { localStorage.setItem("neatnas.site.theme", next); } catch (e) {}
+  paintShots();
 });
 apply(detect());
 // Point the download buttons at the exact assets of the latest release.

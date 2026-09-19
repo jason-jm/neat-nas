@@ -512,7 +512,8 @@ export default function App() {
   };
 
   // ── Dev autopilot ─────────────────────────────────────────────────────
-  // NEATNAS_DEV_AUTOPILOT="open=Photos/2024,grid,preview=IMG_0003.jpg"
+  // NEATNAS_DEV_AUTOPILOT="share=photo,open=2025/Kyoto,grid,preview=DSC_0003.jpg"
+  // Steps: share=, open=, grid, list, preview=, download=, transfers, settings, add.
   // replays UI steps once the listing is on screen, so the real app can be
   // screenshotted by tooling. Inert unless the backend passes the string.
   const autopilotSteps = useRef<string[] | null>(null);
@@ -524,7 +525,7 @@ export default function App() {
   }, [settings]);
   useEffect(() => {
     const steps = autopilotSteps.current;
-    if (!steps || steps.length === 0 || view !== "files") return;
+    if (!steps || steps.length === 0 || (view !== "files" && view !== "shares")) return;
     const step = steps[0];
     logToBackend(`autopilot armed step=${step} tick=${autoTick} entries=${entries.length}`);
     const timer = window.setTimeout(() => {
@@ -537,6 +538,13 @@ export default function App() {
       } else if (step.startsWith("preview=")) {
         const target = entries.find((e) => e.name === step.slice(8));
         if (target) openPreview(target, entries);
+      } else if (step.startsWith("share=")) go({ share: step.slice(6), path: "" });
+      else if (step === "settings") setDialog({ kind: "settings" });
+      else if (step === "add") setDialog({ kind: "add" });
+      else if (step === "transfers") setTransfersOpen(true);
+      else if (step.startsWith("download=")) {
+        const target = entries.find((e) => e.name === step.slice(9));
+        if (target) void download([{ path: target.path, name: target.name, isDir: target.isDir }], false);
       }
       // Advance even when the step changed no state (e.g. mode already set).
       window.setTimeout(() => setAutoTick((n) => n + 1), 900);
