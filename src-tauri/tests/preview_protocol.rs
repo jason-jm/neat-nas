@@ -1,5 +1,11 @@
 //! Exercises the `nasfile://` handler with Tauri's mock runtime against the
 //! local Samba server. Skipped unless NEATNAS_TEST_SMB_* are set.
+//!
+//! Not built on Windows: a test binary that links Tauri's runtime dies at
+//! start-up with STATUS_ENTRYPOINT_NOT_FOUND (0xc0000139) because the
+//! WebView2 loader is only staged next to the real app, and the test would
+//! self-skip on CI anyway for lack of an SMB server.
+#![cfg(not(windows))]
 
 use std::sync::Arc;
 
