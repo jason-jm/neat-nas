@@ -163,5 +163,9 @@
   "settings.theme": "外観",
   "settings.theme.auto": "自動",
   "settings.theme.light": "ライト",
-  "settings.theme.dark": "ダーク"
+  "settings.theme.dark": "ダーク",
+  "settings.doubleClick": "ファイルをダブルクリックしたとき",
+  "settings.doubleClickHint": "クイックルックはどのファイルでも開けます。表示できない種類は案内とダウンロードボタンを表示します。スペースキーは常にクイックルックです。",
+  "settings.action.preview": "クイックルック",
+  "settings.action.download": "ダウンロード"
 }

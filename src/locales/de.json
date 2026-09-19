@@ -163,5 +163,9 @@
   "settings.theme": "Erscheinungsbild",
   "settings.theme.auto": "Automatisch",
   "settings.theme.light": "Hell",
-  "settings.theme.dark": "Dunkel"
+  "settings.theme.dark": "Dunkel",
+  "settings.doubleClick": "Doppelklick auf eine Datei",
+  "settings.doubleClickHint": "Die Übersicht öffnet jede Datei; nicht darstellbare Typen zeigen einen Hinweis mit Download-Button. Die Leertaste öffnet immer die Übersicht.",
+  "settings.action.preview": "Übersicht",
+  "settings.action.download": "Herunterladen"
 }

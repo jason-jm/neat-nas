@@ -163,5 +163,9 @@
   "settings.theme": "Aparência",
   "settings.theme.auto": "Automático",
   "settings.theme.light": "Claro",
-  "settings.theme.dark": "Escuro"
+  "settings.theme.dark": "Escuro",
+  "settings.doubleClick": "Clique duplo em um arquivo",
+  "settings.doubleClickHint": "A Visualização Rápida abre qualquer arquivo; tipos que ela não consegue mostrar exibem um aviso com botão de download. A barra de espaço sempre abre a Visualização Rápida.",
+  "settings.action.preview": "Visualização Rápida",
+  "settings.action.download": "Baixar"
 }

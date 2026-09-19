@@ -163,5 +163,9 @@
   "settings.theme": "모양",
   "settings.theme.auto": "자동",
   "settings.theme.light": "라이트",
-  "settings.theme.dark": "다크"
+  "settings.theme.dark": "다크",
+  "settings.doubleClick": "파일을 두 번 클릭하면",
+  "settings.doubleClickHint": "훑어보기는 모든 파일에 사용할 수 있으며, 표시할 수 없는 형식은 안내와 다운로드 버튼을 보여줍니다. 스페이스 키는 항상 훑어보기입니다.",
+  "settings.action.preview": "훑어보기",
+  "settings.action.download": "다운로드"
 }

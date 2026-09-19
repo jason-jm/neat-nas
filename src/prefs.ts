@@ -1,8 +1,29 @@
 import { isTauri } from "./api";
 
 export type ThemePref = "auto" | "light" | "dark";
+/** What a double-click (or Enter) does with a file; every file type behaves the same. */
+export type DoubleClickAction = "preview" | "download";
 
 const THEME_KEY = "neatnas.theme";
+const DOUBLE_CLICK_KEY = "neatnas.doubleClick";
+
+export function readDoubleClick(): DoubleClickAction {
+  try {
+    if (localStorage.getItem(DOUBLE_CLICK_KEY) === "download") return "download";
+  } catch {
+    /* storage unavailable */
+  }
+  return "preview";
+}
+
+export function writeDoubleClick(action: DoubleClickAction) {
+  try {
+    if (action === "preview") localStorage.removeItem(DOUBLE_CLICK_KEY);
+    else localStorage.setItem(DOUBLE_CLICK_KEY, action);
+  } catch {
+    /* storage unavailable */
+  }
+}
 
 export function readTheme(): ThemePref {
   try {

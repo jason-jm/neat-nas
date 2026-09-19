@@ -40,7 +40,7 @@ import { api } from "../api";
 import { useI18n } from "../i18n";
 import { fileKind, formatBytes, formatDate, type FileKind } from "../format";
 import { Button, ContextMenu, StateView, type MenuItem } from "./ui";
-import { isPreviewable } from "./PreviewModal";
+import type { DoubleClickAction } from "../prefs";
 
 export type BrowserView = "welcome" | "connecting" | "connect-error" | "shares" | "loading" | "files" | "files-error";
 export type ViewMode = "list" | "grid";
@@ -73,6 +73,8 @@ interface Props {
   onDownload: (items: DownloadItem[], chooseFolder: boolean) => void;
   onUpload: (directory: boolean) => void;
   onPreview: (entry: Entry, ordered: Entry[]) => void;
+  /** What double-click and Enter do with a file (Settings). */
+  doubleClick: DoubleClickAction;
   onDragOut: (items: DownloadItem[]) => void;
   onCopied: () => void;
   /** Extra toolbar controls rendered before the refresh button (transfers). */
@@ -340,8 +342,8 @@ export function FileBrowser(p: Props) {
       if (item.isShare) p.onOpenShare(item.name);
       else if (!item.entry) return;
       else if (item.isDir) p.onOpenDir(item.entry.path);
-      else if (isPreviewable(item.entry)) p.onPreview(item.entry, orderedEntries);
-      else p.onDownload([toItem(item.entry)], false);
+      else if (p.doubleClick === "download") p.onDownload([toItem(item.entry)], false);
+      else p.onPreview(item.entry, orderedEntries);
     },
     [p, orderedEntries],
   );

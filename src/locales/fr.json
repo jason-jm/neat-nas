@@ -163,5 +163,9 @@
   "settings.theme": "Apparence",
   "settings.theme.auto": "Automatique",
   "settings.theme.light": "Clair",
-  "settings.theme.dark": "Sombre"
+  "settings.theme.dark": "Sombre",
+  "settings.doubleClick": "Double-clic sur un fichier",
+  "settings.doubleClickHint": "Coup d’œil ouvre n’importe quel fichier ; les types qu’il ne peut pas afficher montrent un message avec un bouton de téléchargement. La barre d’espace ouvre toujours Coup d’œil.",
+  "settings.action.preview": "Coup d’œil",
+  "settings.action.download": "Télécharger"
 }

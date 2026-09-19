@@ -163,5 +163,9 @@
   "settings.theme": "外观",
   "settings.theme.auto": "自动",
   "settings.theme.light": "浅色",
-  "settings.theme.dark": "深色"
+  "settings.theme.dark": "深色",
+  "settings.doubleClick": "双击文件时",
+  "settings.doubleClickHint": "快速预览对任何文件都可用，无法渲染的类型会显示提示和下载按钮。按空格键始终是快速预览。",
+  "settings.action.preview": "快速预览",
+  "settings.action.download": "下载"
 }

@@ -163,5 +163,9 @@
   "settings.theme": "Appearance",
   "settings.theme.auto": "Automatic",
   "settings.theme.light": "Light",
-  "settings.theme.dark": "Dark"
+  "settings.theme.dark": "Dark",
+  "settings.doubleClick": "Double-click a file",
+  "settings.doubleClickHint": "Quick Look shows any file; types it cannot render show a notice with a download button. Space always opens Quick Look.",
+  "settings.action.preview": "Quick Look",
+  "settings.action.download": "Download"
 }

@@ -163,5 +163,9 @@
   "settings.theme": "Оформление",
   "settings.theme.auto": "Автоматически",
   "settings.theme.light": "Светлое",
-  "settings.theme.dark": "Тёмное"
+  "settings.theme.dark": "Тёмное",
+  "settings.doubleClick": "Двойной щелчок по файлу",
+  "settings.doubleClickHint": "Быстрый просмотр открывает любой файл; для типов, которые он не отображает, показывается уведомление с кнопкой скачивания. Пробел всегда открывает быстрый просмотр.",
+  "settings.action.preview": "Быстрый просмотр",
+  "settings.action.download": "Скачать"
 }

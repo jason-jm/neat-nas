@@ -9,11 +9,11 @@ import { FileBrowser, type BrowserView, type ViewMode } from "./components/FileB
 import { TransfersButton, TransfersPopover, useAutoOpen } from "./components/Transfers";
 import { AddServerDialog } from "./components/AddServerDialog";
 import { SettingsDialog, type UpdateState } from "./components/SettingsDialog";
-import { PreviewModal, isPreviewable } from "./components/PreviewModal";
+import { PreviewModal } from "./components/PreviewModal";
 import { Toasts, type Toast } from "./components/ui";
 import { WindowControls } from "./components/WindowControls";
 import { isMac, platform } from "./platform";
-import { applyTheme, readTheme, type ThemePref } from "./prefs";
+import { applyTheme, readDoubleClick, readTheme, writeDoubleClick, type DoubleClickAction, type ThemePref } from "./prefs";
 
 interface Nav {
   share: string | null;
@@ -59,6 +59,7 @@ export default function App() {
   const [viewMode, setViewModeState] = useState<ViewMode>(readViewMode);
   const [showHidden, setShowHiddenState] = useState<boolean>(readShowHidden);
   const [theme, setThemeState] = useState<ThemePref>(readTheme);
+  const [doubleClick, setDoubleClickState] = useState<DoubleClickAction>(readDoubleClick);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [transfers, setTransfers] = useState<TransferProgress[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
@@ -110,6 +111,10 @@ export default function App() {
     } catch {
       /* storage unavailable */
     }
+  };
+  const setDoubleClick = (action: DoubleClickAction) => {
+    setDoubleClickState(action);
+    writeDoubleClick(action);
   };
   const setTheme = (pref: ThemePref) => {
     setThemeState(pref);
@@ -458,11 +463,12 @@ export default function App() {
 
   // ── Preview ───────────────────────────────────────────────────────────
   const openPreview = (entry: Entry, ordered: Entry[]) => {
-    const list = ordered.filter((e) => !e.isDir && isPreviewable(e));
-    const index = list.findIndex((e) => e.path === entry.path);
-    // Files Quick Look cannot render still open, on their own, with the notice.
-    if (index >= 0) setPreview({ entries: list, index });
-    else if (!entry.isDir) setPreview({ entries: [entry], index: 0 });
+    // Every file takes part: types Quick Look cannot render show the
+    // notice with a download button, so browsing with the arrows stays
+    // consistent.
+    const list = ordered.filter((e) => !e.isDir);
+    const index = Math.max(0, list.findIndex((e) => e.path === entry.path));
+    if (list.length > 0) setPreview({ entries: list, index });
   };
 
   // ── Server management ─────────────────────────────────────────────────
@@ -585,6 +591,7 @@ export default function App() {
           onDownload={download}
           onUpload={upload}
           onPreview={openPreview}
+          doubleClick={doubleClick}
           onDragOut={dragOut}
           onCopied={() => notify(t("toast.copied"))}
           toolbarExtra={<TransfersButton transfers={transfers} open={transfersOpen} onClick={() => setTransfersOpen((o) => !o)} />}
@@ -632,6 +639,8 @@ export default function App() {
           onShowHidden={setShowHidden}
           theme={theme}
           onTheme={setTheme}
+          doubleClick={doubleClick}
+          onDoubleClick={setDoubleClick}
           version={version}
           update={update}
           onCheckUpdate={() => void checkUpdate(false)}

@@ -163,5 +163,9 @@
   "settings.theme": "外觀",
   "settings.theme.auto": "自動",
   "settings.theme.light": "淺色",
-  "settings.theme.dark": "深色"
+  "settings.theme.dark": "深色",
+  "settings.doubleClick": "雙擊檔案時",
+  "settings.doubleClickHint": "快速查看對任何檔案都可用，無法顯示的類型會出現提示和下載按鈕。按空白鍵一律是快速查看。",
+  "settings.action.preview": "快速查看",
+  "settings.action.download": "下載"
 }

@@ -3,7 +3,7 @@ import { CircleCheck, Download, FolderOpen, LoaderCircle, RefreshCw, RotateCcw }
 import type { Settings, UpdateInfo, UpdateProgress } from "../types";
 import { api, errorOf } from "../api";
 import { LOCALES, useI18n, type LocalePref } from "../i18n";
-import type { ThemePref } from "../prefs";
+import type { DoubleClickAction, ThemePref } from "../prefs";
 import { Button, Modal } from "./ui";
 
 export type UpdateState =
@@ -20,6 +20,8 @@ interface Props {
   onShowHidden: (on: boolean) => void;
   theme: ThemePref;
   onTheme: (theme: ThemePref) => void;
+  doubleClick: DoubleClickAction;
+  onDoubleClick: (action: DoubleClickAction) => void;
   version: string;
   update: UpdateState;
   onCheckUpdate: () => void;
@@ -35,6 +37,8 @@ export function SettingsDialog({
   onShowHidden,
   theme,
   onTheme,
+  doubleClick,
+  onDoubleClick,
   version,
   update,
   onCheckUpdate,
@@ -95,6 +99,14 @@ export function SettingsDialog({
           )}
         </div>
         <span className="hint">{t("settings.downloadDirHint")}</span>
+      </div>
+      <div className="field">
+        <label>{t("settings.doubleClick")}</label>
+        <select className="input" value={doubleClick} onChange={(e) => onDoubleClick(e.target.value as DoubleClickAction)}>
+          <option value="preview">{t("settings.action.preview")}</option>
+          <option value="download">{t("settings.action.download")}</option>
+        </select>
+        <span className="hint">{t("settings.doubleClickHint")}</span>
       </div>
       <label className="check-row">
         <input type="checkbox" checked={showHidden} onChange={(e) => onShowHidden(e.target.checked)} />

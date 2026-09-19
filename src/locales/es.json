@@ -163,5 +163,9 @@
   "settings.theme": "Apariencia",
   "settings.theme.auto": "Automático",
   "settings.theme.light": "Claro",
-  "settings.theme.dark": "Oscuro"
+  "settings.theme.dark": "Oscuro",
+  "settings.doubleClick": "Al hacer doble clic en un archivo",
+  "settings.doubleClickHint": "La vista rápida abre cualquier archivo; los tipos que no puede mostrar enseñan un aviso con un botón de descarga. La barra espaciadora siempre abre la vista rápida.",
+  "settings.action.preview": "Vista rápida",
+  "settings.action.download": "Descargar"
 }
