@@ -38,6 +38,7 @@
     ],
     "createUpdaterArtifacts": true,
     "publisher": "Neat NAS",
+    "license": "MIT",
     "copyright": "© 2026 Neat NAS",
     "category": "Utility",
     "shortDescription": "A modern SMB NAS browser for Mac and Windows",

@@ -10,14 +10,21 @@
 
 ## Cutting a release
 
-1. Bump the version in `package.json`, `src-tauri/Cargo.toml` and `src-tauri/tauri.conf.json` (keep them identical).
-2. Commit, then tag and push:
+1. Bump the version in `package.json`, `src-tauri/Cargo.toml` and `src-tauri/tauri.conf.json` (keep them identical), commit.
+2. Build both installers on this Mac (the CI workflows are parked, see `ci/README.md`):
    ```bash
-   git tag v1.0.0
-   git push origin v1.0.0
+   export TAURI_SIGNING_PRIVATE_KEY=~/.tauri/neatnas.key TAURI_SIGNING_PRIVATE_KEY_PASSWORD=
+   npm run tauri build -- --target universal-apple-darwin   # .dmg + .app.tar.gz + .sig
+   scripts/build-windows.sh                                  # -setup.exe + .sig
    ```
-3. The `Release` workflow builds macOS and Windows and opens a **draft** GitHub release with the artifacts attached. Review it, then publish.
-4. Publishing makes `latest.json` reachable at `https://github.com/jason-jm/neat-nas/releases/latest/download/latest.json`, which is what running copies poll.
+3. Tag, push, and publish the release with the artifacts and the updater manifest:
+   ```bash
+   git tag v1.0.0 && git push origin main v1.0.0
+   scripts/publish-release.sh v1.0.0          # uploads the bundles, writes and uploads latest.json
+   ```
+4. Running copies poll `https://github.com/jason-jm/neat-nas/releases/latest/download/latest.json`; the repository and its releases must stay public for that.
+
+Once the workflows are enabled, steps 2 and 3 reduce to pushing the tag: the `Release` workflow builds macOS and Windows on GitHub's runners and opens a draft release with everything attached.
 
 ## One-time setup
 
