@@ -159,5 +159,9 @@
   "toast.updateAvailable": "Доступен Neat NAS {v}. Откройте «Настройки», чтобы установить.",
   "transfers.empty": "Передач пока нет",
   "transfers.active": "Выполняется: {n}",
-  "error.unknown": "Что-то пошло не так."
+  "error.unknown": "Что-то пошло не так.",
+  "settings.theme": "Оформление",
+  "settings.theme.auto": "Автоматически",
+  "settings.theme.light": "Светлое",
+  "settings.theme.dark": "Тёмное"
 }

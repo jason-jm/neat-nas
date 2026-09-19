@@ -159,5 +159,9 @@
   "toast.updateAvailable": "O Neat NAS {v} está disponível. Abra as Configurações para instalar.",
   "transfers.empty": "Nenhuma transferência ainda",
   "transfers.active": "{n} em andamento",
-  "error.unknown": "Algo deu errado."
+  "error.unknown": "Algo deu errado.",
+  "settings.theme": "Aparência",
+  "settings.theme.auto": "Automático",
+  "settings.theme.light": "Claro",
+  "settings.theme.dark": "Escuro"
 }

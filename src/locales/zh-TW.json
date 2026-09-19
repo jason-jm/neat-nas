@@ -159,5 +159,9 @@
   "toast.updateAvailable": "Neat NAS {v} 已推出，請到「設定」安裝。",
   "transfers.empty": "還沒有任何傳輸",
   "transfers.active": "{n} 個進行中",
-  "error.unknown": "發生了一些問題。"
+  "error.unknown": "發生了一些問題。",
+  "settings.theme": "外觀",
+  "settings.theme.auto": "自動",
+  "settings.theme.light": "淺色",
+  "settings.theme.dark": "深色"
 }

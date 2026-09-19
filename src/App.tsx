@@ -13,6 +13,7 @@ import { PreviewModal, isPreviewable } from "./components/PreviewModal";
 import { Toasts, type Toast } from "./components/ui";
 import { WindowControls } from "./components/WindowControls";
 import { isMac, platform } from "./platform";
+import { applyTheme, readTheme, type ThemePref } from "./prefs";
 
 interface Nav {
   share: string | null;
@@ -57,6 +58,7 @@ export default function App() {
   const [view, setView] = useState<BrowserView>("welcome");
   const [viewMode, setViewModeState] = useState<ViewMode>(readViewMode);
   const [showHidden, setShowHiddenState] = useState<boolean>(readShowHidden);
+  const [theme, setThemeState] = useState<ThemePref>(readTheme);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [transfers, setTransfers] = useState<TransferProgress[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
@@ -108,6 +110,10 @@ export default function App() {
     } catch {
       /* storage unavailable */
     }
+  };
+  const setTheme = (pref: ThemePref) => {
+    setThemeState(pref);
+    applyTheme(pref);
   };
 
   // ── Navigation ────────────────────────────────────────────────────────
@@ -216,6 +222,11 @@ export default function App() {
     api.listTransfers().then(setTransfers).catch(() => undefined);
     api.appVersion().then(setVersion).catch(() => undefined);
   }, [notify, describe, connect]);
+
+  // index.html painted the stored theme already; this also tells the native window.
+  useEffect(() => {
+    applyTheme(readTheme());
+  }, []);
 
   // ── Updates ───────────────────────────────────────────────────────────
   const checkUpdate = useCallback(
@@ -448,8 +459,10 @@ export default function App() {
   // ── Preview ───────────────────────────────────────────────────────────
   const openPreview = (entry: Entry, ordered: Entry[]) => {
     const list = ordered.filter((e) => !e.isDir && isPreviewable(e));
-    const index = Math.max(0, list.findIndex((e) => e.path === entry.path));
-    if (list.length > 0) setPreview({ entries: list, index });
+    const index = list.findIndex((e) => e.path === entry.path);
+    // Files Quick Look cannot render still open, on their own, with the notice.
+    if (index >= 0) setPreview({ entries: list, index });
+    else if (!entry.isDir) setPreview({ entries: [entry], index: 0 });
   };
 
   // ── Server management ─────────────────────────────────────────────────
@@ -617,6 +630,8 @@ export default function App() {
           settings={settings}
           showHidden={showHidden}
           onShowHidden={setShowHidden}
+          theme={theme}
+          onTheme={setTheme}
           version={version}
           update={update}
           onCheckUpdate={() => void checkUpdate(false)}

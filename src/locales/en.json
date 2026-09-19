@@ -159,5 +159,9 @@
   "toast.updateAvailable": "Neat NAS {v} is available. Open Settings to install it.",
   "transfers.empty": "No transfers yet",
   "transfers.active": "{n} in progress",
-  "error.unknown": "Something went wrong."
+  "error.unknown": "Something went wrong.",
+  "settings.theme": "Appearance",
+  "settings.theme.auto": "Automatic",
+  "settings.theme.light": "Light",
+  "settings.theme.dark": "Dark"
 }

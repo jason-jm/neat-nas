@@ -159,5 +159,9 @@
   "toast.updateAvailable": "Neat NAS {v} est disponible. Ouvrez les Réglages pour l’installer.",
   "transfers.empty": "Aucun transfert pour l’instant",
   "transfers.active": "{n} en cours",
-  "error.unknown": "Une erreur s’est produite."
+  "error.unknown": "Une erreur s’est produite.",
+  "settings.theme": "Apparence",
+  "settings.theme.auto": "Automatique",
+  "settings.theme.light": "Clair",
+  "settings.theme.dark": "Sombre"
 }

@@ -159,5 +159,9 @@
   "toast.updateAvailable": "Neat NAS {v}을(를) 사용할 수 있습니다. 설정에서 설치하세요.",
   "transfers.empty": "아직 전송이 없습니다",
   "transfers.active": "{n}개 진행 중",
-  "error.unknown": "문제가 발생했습니다."
+  "error.unknown": "문제가 발생했습니다.",
+  "settings.theme": "모양",
+  "settings.theme.auto": "자동",
+  "settings.theme.light": "라이트",
+  "settings.theme.dark": "다크"
 }

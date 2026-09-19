@@ -378,7 +378,13 @@ export function FileBrowser(p: Props) {
     const m = marqueeRef.current;
     const el = contentRef.current;
     if (!m || !el) return;
-    const { x, y, rect } = contentPoint(e);
+    const pt = contentPoint(e);
+    const rect = pt.rect;
+    // Keep the box inside the scrollable list area and below the sticky
+    // column header, so it never reaches over other UI.
+    const headerH = el.querySelector("thead")?.getBoundingClientRect().height ?? 0;
+    const x = Math.min(Math.max(pt.x, 0), Math.max(el.scrollWidth, el.clientWidth));
+    const y = Math.min(Math.max(pt.y, el.scrollTop + headerH), Math.max(el.scrollHeight, el.clientHeight));
     if (!m.active) {
       if (Math.abs(x - m.startX) < 4 && Math.abs(y - m.startY) < 4) return;
       m.active = true;
@@ -407,6 +413,7 @@ export function FileBrowser(p: Props) {
     window.removeEventListener("mouseup", onMarqueeUp);
     if (marqueeRef.current?.active) suppressClickRef.current = true;
     marqueeRef.current = null;
+    document.body.classList.remove("marqueeing");
     setMarquee(null);
   }, [onMarqueeMove]);
 
@@ -415,6 +422,11 @@ export function FileBrowser(p: Props) {
     if (!contentRef.current) return;
     const target = e.target as HTMLElement;
     if (target.closest("[data-index], .btn, input, button, thead, form")) return;
+    // Stop the WebView from starting a text selection or drag of its own;
+    // preventDefault also skips the focus change, so focus explicitly.
+    e.preventDefault();
+    contentRef.current.focus({ preventScroll: true });
+    document.body.classList.add("marqueeing");
     const { x, y } = contentPoint(e);
     marqueeRef.current = { startX: x, startY: y, additive: e.metaKey || e.ctrlKey || e.shiftKey, base: new Set(selection), active: false };
     window.addEventListener("mousemove", onMarqueeMove);
@@ -464,7 +476,7 @@ export function FileBrowser(p: Props) {
     if (entry.isDir && targets.length === 1) {
       items.push({ label: t("menu.open"), icon: <FolderOpen size={14} />, onClick: () => p.onOpenDir(entry.path) });
     }
-    if (!entry.isDir && targets.length === 1 && isPreviewable(entry)) {
+    if (!entry.isDir && targets.length === 1) {
       items.push({ label: t("menu.preview"), icon: <Eye size={14} />, onClick: () => p.onPreview(entry, orderedEntries) });
     }
     items.push(
@@ -496,7 +508,7 @@ export function FileBrowser(p: Props) {
     }
     if (e.key === " ") {
       e.preventDefault();
-      const target = selectedEntries.find((x) => !x.isDir && isPreviewable(x));
+      const target = selectedEntries.find((x) => !x.isDir);
       if (target) p.onPreview(target, orderedEntries);
       return;
     }

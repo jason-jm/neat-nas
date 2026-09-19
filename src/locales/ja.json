@@ -159,5 +159,9 @@
   "toast.updateAvailable": "Neat NAS {v} が利用できます。「設定」からインストールしてください。",
   "transfers.empty": "転送はまだありません",
   "transfers.active": "{n} 件進行中",
-  "error.unknown": "問題が発生しました。"
+  "error.unknown": "問題が発生しました。",
+  "settings.theme": "外観",
+  "settings.theme.auto": "自動",
+  "settings.theme.light": "ライト",
+  "settings.theme.dark": "ダーク"
 }

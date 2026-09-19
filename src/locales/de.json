@@ -159,5 +159,9 @@
   "toast.updateAvailable": "Neat NAS {v} ist verfügbar. Öffne die Einstellungen, um es zu installieren.",
   "transfers.empty": "Noch keine Übertragungen",
   "transfers.active": "{n} laufend",
-  "error.unknown": "Etwas ist schiefgelaufen."
+  "error.unknown": "Etwas ist schiefgelaufen.",
+  "settings.theme": "Erscheinungsbild",
+  "settings.theme.auto": "Automatisch",
+  "settings.theme.light": "Hell",
+  "settings.theme.dark": "Dunkel"
 }

@@ -3,6 +3,7 @@ import { CircleCheck, Download, FolderOpen, LoaderCircle, RefreshCw, RotateCcw }
 import type { Settings, UpdateInfo, UpdateProgress } from "../types";
 import { api, errorOf } from "../api";
 import { LOCALES, useI18n, type LocalePref } from "../i18n";
+import type { ThemePref } from "../prefs";
 import { Button, Modal } from "./ui";
 
 export type UpdateState =
@@ -17,6 +18,8 @@ interface Props {
   settings: Settings | null;
   showHidden: boolean;
   onShowHidden: (on: boolean) => void;
+  theme: ThemePref;
+  onTheme: (theme: ThemePref) => void;
   version: string;
   update: UpdateState;
   onCheckUpdate: () => void;
@@ -26,7 +29,20 @@ interface Props {
   onError: (text: string) => void;
 }
 
-export function SettingsDialog({ settings, showHidden, onShowHidden, version, update, onCheckUpdate, onInstallUpdate, onClose, onSettingsChanged, onError }: Props) {
+export function SettingsDialog({
+  settings,
+  showHidden,
+  onShowHidden,
+  theme,
+  onTheme,
+  version,
+  update,
+  onCheckUpdate,
+  onInstallUpdate,
+  onClose,
+  onSettingsChanged,
+  onError,
+}: Props) {
   const { t, errorText, localePref, setLocalePref } = useI18n();
   const [busy, setBusy] = useState(false);
 
@@ -55,7 +71,7 @@ export function SettingsDialog({ settings, showHidden, onShowHidden, version, up
     <Modal
       title={t("settings.title")}
       onClose={onClose}
-      width={480}
+      width={500}
       footer={
         <Button variant="primary" onClick={onClose}>
           {t("settings.close")}
@@ -87,6 +103,14 @@ export function SettingsDialog({ settings, showHidden, onShowHidden, version, up
           <span className="hint" style={{ display: "block" }}>{t("settings.showHiddenHint")}</span>
         </span>
       </label>
+      <div className="field">
+        <label>{t("settings.theme")}</label>
+        <select className="input" value={theme} onChange={(e) => onTheme(e.target.value as ThemePref)}>
+          <option value="auto">{t("settings.theme.auto")}</option>
+          <option value="light">{t("settings.theme.light")}</option>
+          <option value="dark">{t("settings.theme.dark")}</option>
+        </select>
+      </div>
       <div className="field">
         <label>{t("settings.language")}</label>
         <select className="input" value={localePref} onChange={(e) => setLocalePref(e.target.value as LocalePref)}>

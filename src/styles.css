@@ -1,5 +1,5 @@
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text", "Segoe UI", "PingFang SC", "Microsoft YaHei", Inter, Roboto, sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
@@ -30,24 +30,23 @@
   --titlebar-h: 52px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #1c1c1f;
-    --bg-sidebar: #161618;
-    --surface: #242428;
-    --surface-2: #2c2c31;
-    --surface-hover: rgba(255, 255, 255, 0.055);
-    --border: rgba(255, 255, 255, 0.08);
-    --border-strong: rgba(255, 255, 255, 0.16);
-    --text: #f3f3f5;
-    --text-2: #a5a5ad;
-    --text-3: #78787f;
-    --accent: #5b83ff;
-    --accent-hover: #7396ff;
-    --accent-soft: rgba(91, 131, 255, 0.2);
-    --shadow-lg: 0 24px 70px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.4);
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #1c1c1f;
+  --bg-sidebar: #161618;
+  --surface: #242428;
+  --surface-2: #2c2c31;
+  --surface-hover: rgba(255, 255, 255, 0.055);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --text: #f3f3f5;
+  --text-2: #a5a5ad;
+  --text-3: #78787f;
+  --accent: #5b83ff;
+  --accent-hover: #7396ff;
+  --accent-soft: rgba(91, 131, 255, 0.2);
+  --shadow-lg: 0 24px 70px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 * { box-sizing: border-box; }
@@ -357,7 +356,8 @@ a { color: var(--accent); }
 .pathbar .seg.current { color: var(--text); font-weight: 500; flex-shrink: 0; max-width: 60%; }
 .pathbar .sep { color: var(--text-3); display: flex; flex: none; }
 .pathbar .status { margin-left: auto; flex: none; color: var(--text-3); white-space: nowrap; }
-.marquee { position: absolute; border: 1px solid var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); border-radius: 3px; pointer-events: none; z-index: 5; }
+body.marqueeing, body.marqueeing * { user-select: none !important; -webkit-user-select: none !important; cursor: default; }
+.marquee { position: absolute; border: 1px solid var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); border-radius: 3px; pointer-events: none; z-index: 0; }
 .statusbar { display: none; }
 
 /* ── Transfers button + floating panel ───────────────────────────────── */
@@ -396,3 +396,4 @@ a { color: var(--accent); }
 .win-btn:hover { background: var(--surface-hover); color: var(--text); }
 .win-btn.close:hover { background: #e81123; color: #fff; }
 .win-btn:active { opacity: 0.8; }
+
