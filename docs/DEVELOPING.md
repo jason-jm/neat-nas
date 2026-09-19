@@ -70,7 +70,7 @@ src-tauri/src/
 src-tauri/tests/          integration tests against a real SMB server
 scripts/                  dev Samba, Windows cross-build, release publishing, i18n check
 docs/                     website (GitHub Pages), localized READMEs, marketing copy
-ci/                       GitHub Actions workflows, parked until enabled (see ci/README.md)
+.github/workflows/        CI (check + tests on push) and Release (tag v* builds both installers)
 ```
 
 Config lives at `~/Library/Application Support/com.neatnas.app/config.json`
