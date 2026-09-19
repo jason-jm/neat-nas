@@ -1,0 +1,74 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Neat NAS",
+  "version": "1.0.0",
+  "identifier": "com.neatnas.app",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Neat NAS",
+        "width": 1120,
+        "height": 720,
+        "minWidth": 860,
+        "minHeight": 540,
+        "center": true,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "createUpdaterArtifacts": true,
+    "publisher": "Neat NAS",
+    "copyright": "© 2026 Neat NAS",
+    "category": "Utility",
+    "shortDescription": "A modern SMB NAS browser for Mac and Windows",
+    "longDescription": "Neat NAS shows your home NAS the moment it opens: browse shares, preview photos, video and documents straight from the NAS, and move files between your computers with resumable transfers.",
+    "macOS": {
+      "minimumSystemVersion": "11.0"
+    },
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": [
+          "SimpChinese",
+          "English"
+        ],
+        "displayLanguageSelector": true
+      },
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper",
+        "silent": true
+      }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEVCOTVEMUZBQ0MxMTU0NTMKUldSVFZCSE0rdEdWNjhYVE83ejF1d1MyVVZHVUpYWUhadVg0amp2SW5HSllmTGVMOVJlcnVBeGkK",
+      "endpoints": [
+        "https://github.com/jason-jm/neat-nas/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  }
+}

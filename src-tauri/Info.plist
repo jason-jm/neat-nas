@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- macOS 14+ asks the user before an app may browse the local network.
+       Without these keys Bonjour discovery of _smb._tcp silently finds nothing. -->
+  <key>NSLocalNetworkUsageDescription</key>
+  <string>Neat NAS looks for NAS devices on your local network and connects to them over SMB.</string>
+  <key>NSBonjourServices</key>
+  <array>
+    <string>_smb._tcp</string>
+  </array>
+  <key>LSApplicationCategoryType</key>
+  <string>public.app-category.utilities</string>
+</dict>
+</plist>

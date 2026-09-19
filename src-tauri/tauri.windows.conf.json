@@ -1,0 +1,17 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "app": {
+    "windows": [
+      {
+        "title": "Neat NAS",
+        "width": 1120,
+        "height": 720,
+        "minWidth": 920,
+        "minHeight": 540,
+        "center": true,
+        "decorations": false,
+        "shadow": true
+      }
+    ]
+  }
+}
