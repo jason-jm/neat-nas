@@ -28,3 +28,6 @@ dist-ssr
 
 # Claude Code local config
 .claude/
+
+# local release artifacts (scripts/build-windows.sh)
+release/

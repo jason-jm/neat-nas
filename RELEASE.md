@@ -53,22 +53,27 @@ Unsigned installers trigger SmartScreen ("Windows protected your PC" → More in
 
 ```bash
 # current platform; artifacts land in src-tauri/target/release/bundle/
-TAURI_SIGNING_PRIVATE_KEY_PATH=~/.tauri/neatnas.key npm run tauri build
+TAURI_SIGNING_PRIVATE_KEY=~/.tauri/neatnas.key npm run tauri build
 # macOS universal (needs both Rust targets installed)
-TAURI_SIGNING_PRIVATE_KEY_PATH=~/.tauri/neatnas.key npm run tauri build -- --target universal-apple-darwin
+TAURI_SIGNING_PRIVATE_KEY=~/.tauri/neatnas.key npm run tauri build -- --target universal-apple-darwin
 ```
 
-Without the signing key the bundles are still produced; only the updater signature step at the end reports an error.
+`TAURI_SIGNING_PRIVATE_KEY` accepts either the key contents or a path to the key file. Without it the bundles are still produced; only the updater signature step at the end reports an error.
 
-Windows installers must be built on Windows (or by the workflow); Tauri cannot cross-build NSIS/MSI from macOS. A Windows compile check from macOS is possible with the MSVC target and LLVM's `llvm-rc`:
+### Windows installer from macOS
+
+The NSIS installer (not the MSI) can be cross-built on this Mac; Tauri calls this experimental, and the CI Windows runner remains the reference build:
 
 ```bash
 rustup target add x86_64-pc-windows-msvc
-brew install llvm
-scripts/check-windows.sh
+brew install llvm makensis
+cargo install cargo-xwin
+scripts/build-windows.sh        # -> release/<version>/Neat NAS_<version>_x64-setup.exe
 ```
 
-The script disables the `updater` Cargo feature for the check (its HTTP stack compiles C code that needs a Windows toolchain) and overrides the capability list to match; the Windows CI runner builds the complete app.
+The first run downloads the Windows SDK and CRT (about 1 GB) into cargo-xwin's cache. Homebrew's makensis 3.12 aborts with `std::bad_alloc` on recent macOS unless a debugger is attached; the script detects that and runs it under `lldb`. The installer is not Authenticode-signed, so SmartScreen shows a warning on first launch.
+
+A quicker compile-only check is `scripts/check-windows.sh` (it disables the `updater` feature and parks its capability because that check runs without the Windows C toolchain that cargo-xwin provides).
 
 ## Platform behaviour to keep in mind
 
