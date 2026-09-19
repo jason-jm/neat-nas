@@ -76,12 +76,13 @@
   .shot .light.r { left: 1.7%; background: var(--mac-red); } .shot .light.y { left: 3.75%; background: var(--mac-yel); } .shot .light.g { left: 5.8%; background: var(--mac-grn); }
   .hero-shot { transform: perspective(1400px) rotateY(-6deg) rotateX(2deg); transition: transform .5s ease; }
   .hero-shot:hover { transform: none; }
-  .gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 36px; }
-  .gallery figure { margin: 0; }
-  .gallery figcaption { padding: 14px 6px 0; }
-  .gallery h3 { margin: 0 0 4px; font-size: 16px; }
-  .gallery p { margin: 0; font-size: 14px; color: var(--text-2); }
-  .gallery .wide { grid-column: 1 / -1; }
+  .details { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 36px; }
+  .details figure { margin: 0; }
+  .detail { border-radius: 14px; overflow: hidden; border: 1px solid var(--line-2); background: var(--bg-2); box-shadow: 0 10px 30px rgba(0,0,0,.10); aspect-ratio: 4 / 3; }
+  .detail img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .details figcaption { padding: 14px 6px 0; }
+  .details h3 { margin: 0 0 4px; font-size: 16px; }
+  .details p { margin: 0; font-size: 14px; color: var(--text-2); }
   /* Sections */
   section { padding: 72px 0; }
   .kicker { color: var(--accent); font-weight: 700; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; }
@@ -117,12 +118,13 @@
   @media (max-width: 900px) {
     .hero { grid-template-columns: 1fr; padding-top: 56px; }
     .hero-shot { transform: none; }
-    .gallery { grid-template-columns: 1fr; }
+    .details { grid-template-columns: 1fr; }
     .three, .steps, .stats { grid-template-columns: 1fr; }
     .grid { grid-template-columns: 1fr 1fr; }
     .oss { grid-template-columns: 1fr; padding: 28px; }
     nav .links a.hide-sm { display: none; }
   }
+  @media (max-width: 1000px) and (min-width: 561px) { .details { grid-template-columns: 1fr 1fr; } }
   @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
 </style>
 </head>
@@ -188,13 +190,14 @@
   </section>
   <section id="screens">
     <span class="kicker" data-i18n="gallery.kicker">See it in action</span>
-    <h2 data-i18n="gallery.title">The whole app, at a glance</h2>
-    <div class="gallery">
-      <figure class="wide"><div class="shot"><img data-shot="quicklook" alt="Quick Look of a photo"><i class="light r"></i><i class="light y"></i><i class="light g"></i></div><figcaption><h3 data-i18n="g1.h">Quick Look</h3><p data-i18n="g1.p">Space opens photos, video, PDF and text straight from the NAS; the arrow keys walk through the folder.</p></figcaption></figure>
-      <figure><div class="shot"><img data-shot="list" alt="Folder listing"><i class="light r"></i><i class="light y"></i><i class="light g"></i></div><figcaption><h3 data-i18n="g2.h">Folders that load instantly</h3><p data-i18n="g2.p">List or grid, sortable, with a search box that filters as you type.</p></figcaption></figure>
-      <figure><div class="shot"><img data-shot="transfers" alt="Transfers popover"><i class="light r"></i><i class="light y"></i><i class="light g"></i></div><figcaption><h3 data-i18n="g3.h">Transfers you can trust</h3><p data-i18n="g3.p">Progress, pause and resume in a small popover; interrupted transfers pick up where they left off.</p></figcaption></figure>
-      <figure><div class="shot"><img data-shot="discover" alt="Add NAS dialog with discovered servers"><i class="light r"></i><i class="light y"></i><i class="light g"></i></div><figcaption><h3 data-i18n="g4.h">Your NAS finds you</h3><p data-i18n="g4.p">The add dialog lists every SMB server on the network: pick one, enter the password once, done.</p></figcaption></figure>
-      <figure><div class="shot"><img data-shot="settings" alt="Settings"><i class="light r"></i><i class="light y"></i><i class="light g"></i></div><figcaption><h3 data-i18n="g5.h">Settings that fit on one screen</h3><p data-i18n="g5.p">Download folder, double-click behaviour, appearance, language and one-click updates.</p></figcaption></figure>
+    <h2 data-i18n="gallery.title">Six details worth a closer look</h2>
+    <div class="details">
+      <figure><div class="detail"><img data-shot="sidebar" alt="The saved NAS in the sidebar, connected"></div><figcaption><h3 data-i18n="g2.h">Saved once, always there</h3><p data-i18n="g2.p">Your NAS lives in the sidebar and is connected the moment the app opens.</p></figcaption></figure>
+      <figure><div class="detail"><img data-shot="thumbs" alt="Photo thumbnails in the grid view"></div><figcaption><h3 data-i18n="g6.h">Instant photo grids</h3><p data-i18n="g6.p">Thumbnails come from the previews cameras embed in every photo, so folders of RAW and HEIC files fill in right away.</p></figcaption></figure>
+      <figure><div class="detail"><img data-shot="quicklook" alt="Quick Look of a photo"></div><figcaption><h3 data-i18n="g1.h">Quick Look</h3><p data-i18n="g1.p">Space opens photos, video, PDF and text straight from the NAS; the arrow keys walk through the folder.</p></figcaption></figure>
+      <figure><div class="detail"><img data-shot="transfers" alt="Transfers popover with a download in progress"></div><figcaption><h3 data-i18n="g3.h">Transfers you can trust</h3><p data-i18n="g3.p">Progress, pause and resume in a small popover; interrupted transfers pick up where they left off.</p></figcaption></figure>
+      <figure><div class="detail"><img data-shot="discover" alt="NAS devices found on the network"></div><figcaption><h3 data-i18n="g4.h">Your NAS finds you</h3><p data-i18n="g4.p">The add dialog lists every SMB server on the network: pick one, enter the password once, done.</p></figcaption></figure>
+      <figure><div class="detail"><img data-shot="settings" alt="Appearance and language settings"></div><figcaption><h3 data-i18n="g5.h">Appearance and language</h3><p data-i18n="g5.p">Light, dark or automatic, and ten interface languages, switched without a restart.</p></figcaption></figure>
     </div>
   </section>
 
@@ -271,7 +274,7 @@ const I18N = {
     "s1.h": "安装", "s1.p": "macOS 打开 .dmg，Windows 运行安装器，不需要管理员权限。",
     "s2.h": "选择你的 NAS", "s2.p": "通常已经列出来了。输入一次用户名和密码，它们会进入钥匙串。",
     "s3.h": "完成", "s3.p": "从现在起，打开 Neat NAS 就等于打开你的文件。",
-    "oss.kicker": "开源", "oss.title": "MIT 协议。欢迎 Star、Fork 和翻译。", "oss.sub": "Neat NAS 用 Rust、Tauri 和 React 构建，每一行代码都在 GitHub 上。欢迎提交问题、翻译和 PR。", "oss.btn": "在 GitHub 上查看", "oss.issue": "反馈问题", "gallery.kicker": "看看实际效果", "gallery.title": "整个应用，一眼看完", "g1.h": "快速预览", "g1.p": "按空格直接从 NAS 打开照片、视频、PDF 和文本，左右键翻看整个文件夹。", "g2.h": "秒开的文件夹", "g2.p": "列表或网格，可排序，搜索框边打字边筛选。", "g3.h": "放心的传输", "g3.p": "进度、暂停、继续都在一个小面板里，中断的传输从断点接着传。", "g4.h": "NAS 自己找上门", "g4.p": "添加对话框列出局域网里所有 SMB 服务器，选一个，输一次密码，完事。", "g5.h": "一屏放下的设置", "g5.p": "下载文件夹、双击行为、外观、语言和一键更新。" },
+    "oss.kicker": "开源", "oss.title": "MIT 协议。欢迎 Star、Fork 和翻译。", "oss.sub": "Neat NAS 用 Rust、Tauri 和 React 构建，每一行代码都在 GitHub 上。欢迎提交问题、翻译和 PR。", "oss.btn": "在 GitHub 上查看", "oss.issue": "反馈问题", "gallery.kicker": "看看实际效果", "gallery.title": "六个值得放大看的细节", "g1.h": "快速预览", "g1.p": "按空格直接从 NAS 打开照片、视频、PDF 和文本，左右键翻看整个文件夹。", "g2.h": "记一次，一直在", "g2.p": "NAS 就住在侧栏里，应用一打开就已连上。", "g3.h": "放心的传输", "g3.p": "进度、暂停、继续都在一个小面板里，中断的传输从断点接着传。", "g4.h": "NAS 自己找上门", "g4.p": "添加对话框列出局域网里所有 SMB 服务器，选一个，输一次密码，完事。", "g5.h": "外观与语言", "g5.p": "浅色、深色或自动，十种界面语言，切换不用重启。", "g6.h": "秒开的照片网格", "g6.p": "缩略图来自相机内嵌在每张照片里的预览，RAW 和 HEIC 文件夹也能立刻铺满。" },
   "zh-TW": { name: "繁體中文",
     "nav.features": "功能", "nav.download": "下載",
     "hero.eyebrow": "macOS · Windows · 免費開源",
@@ -299,7 +302,7 @@ const I18N = {
     "s1.h": "安裝", "s1.p": "macOS 開啟 .dmg，Windows 執行安裝程式，不需要管理員權限。",
     "s2.h": "選擇你的 NAS", "s2.p": "通常已經列出來了。輸入一次使用者名稱和密碼，它們會進入鑰匙圈。",
     "s3.h": "完成", "s3.p": "從現在起，開啟 Neat NAS 就等於開啟你的檔案。",
-    "oss.kicker": "開源", "oss.title": "MIT 授權。歡迎 Star、Fork 和翻譯。", "oss.sub": "Neat NAS 以 Rust、Tauri 和 React 打造，每一行程式碼都在 GitHub 上。歡迎回報問題、翻譯和 PR。", "oss.btn": "在 GitHub 上查看", "oss.issue": "回報問題", "gallery.kicker": "看看實際效果", "gallery.title": "整個應用程式，一眼看完", "g1.h": "快速查看", "g1.p": "按空白鍵直接從 NAS 開啟照片、影片、PDF 和文字，左右鍵翻看整個資料夾。", "g2.h": "秒開的資料夾", "g2.p": "列表或格狀，可排序，搜尋框邊打字邊篩選。", "g3.h": "放心的傳輸", "g3.p": "進度、暫停、繼續都在一個小面板裡，中斷的傳輸從斷點接著傳。", "g4.h": "NAS 自己找上門", "g4.p": "新增對話框列出區域網路裡所有 SMB 伺服器，選一個，輸入一次密碼，完成。", "g5.h": "一個畫面放得下的設定", "g5.p": "下載資料夾、雙擊行為、外觀、語言和一鍵更新。" },
+    "oss.kicker": "開源", "oss.title": "MIT 授權。歡迎 Star、Fork 和翻譯。", "oss.sub": "Neat NAS 以 Rust、Tauri 和 React 打造，每一行程式碼都在 GitHub 上。歡迎回報問題、翻譯和 PR。", "oss.btn": "在 GitHub 上查看", "oss.issue": "回報問題", "gallery.kicker": "看看實際效果", "gallery.title": "六個值得放大看的細節", "g1.h": "快速查看", "g1.p": "按空白鍵直接從 NAS 開啟照片、影片、PDF 和文字，左右鍵翻看整個資料夾。", "g2.h": "記一次，一直都在", "g2.p": "NAS 就住在側欄裡，應用程式一開啟就已連線。", "g3.h": "放心的傳輸", "g3.p": "進度、暫停、繼續都在一個小面板裡，中斷的傳輸從斷點接著傳。", "g4.h": "NAS 自己找上門", "g4.p": "新增對話框列出區域網路裡所有 SMB 伺服器，選一個，輸入一次密碼，完成。", "g5.h": "外觀與語言", "g5.p": "淺色、深色或自動，十種介面語言，切換不必重啟。", "g6.h": "秒開的照片格狀檢視", "g6.p": "縮圖來自相機內嵌在每張照片裡的預覽，RAW 和 HEIC 資料夾也能立刻填滿。" },
   ja: { name: "日本語",
     "nav.features": "機能", "nav.download": "ダウンロード",
     "hero.eyebrow": "macOS · Windows · 無料・オープンソース",
@@ -327,7 +330,7 @@ const I18N = {
     "s1.h": "インストール", "s1.p": "macOS は .dmg を開き、Windows はインストーラーを実行。管理者権限は不要です。",
     "s2.h": "NAS を選ぶ", "s2.p": "たいてい一覧にもう並んでいます。ユーザー名とパスワードを一度入力すると、キーチェーンに保存されます。",
     "s3.h": "これだけ", "s3.p": "これからは Neat NAS を開く＝ファイルを開く、です。",
-    "oss.kicker": "オープンソース", "oss.title": "MIT ライセンス。Star、Fork、翻訳を歓迎します。", "oss.sub": "Neat NAS は Rust、Tauri、React で作られ、すべてのコードが GitHub にあります。バグ報告、翻訳、プルリクエストをお待ちしています。", "oss.btn": "GitHub で見る", "oss.issue": "バグを報告", "gallery.kicker": "実際の画面", "gallery.title": "アプリの全体を、ひと目で", "g1.h": "クイックルック", "g1.p": "スペースキーで写真・動画・PDF・テキストを NAS から直接開き、矢印キーでフォルダ内を移動。", "g2.h": "一瞬で開くフォルダ", "g2.p": "リストでもグリッドでも、並べ替えでき、検索欄は入力と同時に絞り込み。", "g3.h": "安心して任せられる転送", "g3.p": "進捗・一時停止・再開が小さなパネルに。中断した転送は途中から再開。", "g4.h": "NAS のほうから見つかる", "g4.p": "追加ダイアログにネットワーク上の SMB サーバーがすべて並びます。選んでパスワードを一度入れるだけ。", "g5.h": "一画面に収まる設定", "g5.p": "ダウンロード先、ダブルクリックの動作、外観、言語、ワンクリック更新。" },
+    "oss.kicker": "オープンソース", "oss.title": "MIT ライセンス。Star、Fork、翻訳を歓迎します。", "oss.sub": "Neat NAS は Rust、Tauri、React で作られ、すべてのコードが GitHub にあります。バグ報告、翻訳、プルリクエストをお待ちしています。", "oss.btn": "GitHub で見る", "oss.issue": "バグを報告", "gallery.kicker": "実際の画面", "gallery.title": "拡大して見たい 6 つのディテール", "g1.h": "クイックルック", "g1.p": "スペースキーで写真・動画・PDF・テキストを NAS から直接開き、矢印キーでフォルダ内を移動。", "g2.h": "一度覚えれば、ずっとそこに", "g2.p": "NAS はサイドバーに住んでいて、アプリを開いた瞬間にはもう接続済み。", "g3.h": "安心して任せられる転送", "g3.p": "進捗・一時停止・再開が小さなパネルに。中断した転送は途中から再開。", "g4.h": "NAS のほうから見つかる", "g4.p": "追加ダイアログにネットワーク上の SMB サーバーがすべて並びます。選んでパスワードを一度入れるだけ。", "g5.h": "外観と言語", "g5.p": "ライト・ダーク・自動と 10 の表示言語。再起動なしで切り替え。", "g6.h": "一瞬で並ぶ写真グリッド", "g6.p": "サムネイルはカメラが埋め込んだプレビューから。RAW や HEIC のフォルダもすぐに埋まります。" },
   ko: { name: "한국어",
     "nav.features": "기능", "nav.download": "다운로드",
     "hero.eyebrow": "macOS · Windows · 무료 오픈소스",
@@ -355,7 +358,7 @@ const I18N = {
     "s1.h": "설치", "s1.p": "macOS는 .dmg를 열고 Windows는 설치 파일을 실행하세요. 관리자 권한이 필요 없습니다.",
     "s2.h": "NAS 선택", "s2.p": "대개 이미 목록에 있습니다. 사용자 이름과 비밀번호를 한 번 입력하면 키체인에 저장됩니다.",
     "s3.h": "끝", "s3.p": "이제 Neat NAS를 여는 것이 곧 파일을 여는 것입니다.",
-    "oss.kicker": "오픈소스", "oss.title": "MIT 라이선스. Star, Fork, 번역을 환영합니다.", "oss.sub": "Neat NAS는 Rust, Tauri, React로 만들어졌고 모든 코드가 GitHub에 있습니다. 버그 신고, 번역, PR을 환영합니다.", "oss.btn": "GitHub에서 보기", "oss.issue": "버그 신고", "gallery.kicker": "실제 화면", "gallery.title": "앱 전체를 한눈에", "g1.h": "훑어보기", "g1.p": "스페이스 키로 사진, 동영상, PDF, 텍스트를 NAS에서 바로 열고, 화살표로 폴더를 넘깁니다.", "g2.h": "즉시 열리는 폴더", "g2.p": "목록이든 격자든 정렬할 수 있고, 검색창은 입력하는 대로 걸러 줍니다.", "g3.h": "믿을 수 있는 전송", "g3.p": "진행률, 일시 정지, 재개가 작은 패널 하나에. 끊긴 전송은 멈춘 곳부터 이어집니다.", "g4.h": "NAS가 먼저 찾아옵니다", "g4.p": "추가 대화상자에 네트워크의 모든 SMB 서버가 나열됩니다. 하나 고르고 비밀번호를 한 번 입력하면 끝.", "g5.h": "한 화면에 담긴 설정", "g5.p": "다운로드 폴더, 두 번 클릭 동작, 모양, 언어, 원클릭 업데이트." },
+    "oss.kicker": "오픈소스", "oss.title": "MIT 라이선스. Star, Fork, 번역을 환영합니다.", "oss.sub": "Neat NAS는 Rust, Tauri, React로 만들어졌고 모든 코드가 GitHub에 있습니다. 버그 신고, 번역, PR을 환영합니다.", "oss.btn": "GitHub에서 보기", "oss.issue": "버그 신고", "gallery.kicker": "실제 화면", "gallery.title": "가까이서 볼 만한 6가지 디테일", "g1.h": "훑어보기", "g1.p": "스페이스 키로 사진, 동영상, PDF, 텍스트를 NAS에서 바로 열고, 화살표로 폴더를 넘깁니다.", "g2.h": "한 번 저장하면 늘 그 자리에", "g2.p": "NAS는 사이드바에 살고, 앱을 여는 순간 이미 연결되어 있습니다.", "g3.h": "믿을 수 있는 전송", "g3.p": "진행률, 일시 정지, 재개가 작은 패널 하나에. 끊긴 전송은 멈춘 곳부터 이어집니다.", "g4.h": "NAS가 먼저 찾아옵니다", "g4.p": "추가 대화상자에 네트워크의 모든 SMB 서버가 나열됩니다. 하나 고르고 비밀번호를 한 번 입력하면 끝.", "g5.h": "모양과 언어", "g5.p": "라이트, 다크, 자동과 10개 인터페이스 언어. 재시작 없이 바뀝니다.", "g6.h": "즉시 뜨는 사진 격자", "g6.p": "썸네일은 카메라가 사진마다 넣어 둔 미리보기에서 옵니다. RAW와 HEIC 폴더도 바로 채워집니다." },
   de: { name: "Deutsch",
     "nav.features": "Funktionen", "nav.download": "Download",
     "hero.eyebrow": "macOS · Windows · Kostenlos und Open Source",
@@ -383,7 +386,7 @@ const I18N = {
     "s1.h": "Installieren", "s1.p": "Auf dem Mac die .dmg öffnen, unter Windows das Setup ausführen. Keine Adminrechte nötig.",
     "s2.h": "NAS auswählen", "s2.p": "Meist steht es schon in der Liste. Benutzername und Passwort einmal eingeben, sie wandern in den Schlüsselbund.",
     "s3.h": "Fertig", "s3.p": "Ab jetzt heißt Neat NAS öffnen: deine Dateien öffnen.",
-    "oss.kicker": "Open Source", "oss.title": "MIT-lizenziert. Stern vergeben, forken, übersetzen.", "oss.sub": "Neat NAS ist mit Rust, Tauri und React gebaut, jede Zeile liegt auf GitHub. Fehlerberichte, Übersetzungen und Pull Requests sind willkommen.", "oss.btn": "Auf GitHub ansehen", "oss.issue": "Fehler melden", "gallery.kicker": "In Aktion", "gallery.title": "Die ganze App auf einen Blick", "g1.h": "Übersicht", "g1.p": "Die Leertaste öffnet Fotos, Video, PDF und Text direkt vom NAS; die Pfeiltasten blättern durch den Ordner.", "g2.h": "Ordner, die sofort da sind", "g2.p": "Liste oder Raster, sortierbar, mit einem Suchfeld, das beim Tippen filtert.", "g3.h": "Übertragungen, auf die Verlass ist", "g3.p": "Fortschritt, Pause und Fortsetzen in einem kleinen Fenster; unterbrochene Übertragungen machen dort weiter, wo sie waren.", "g4.h": "Dein NAS findet dich", "g4.p": "Der Dialog listet jeden SMB-Server im Netzwerk: einen auswählen, Passwort einmal eingeben, fertig.", "g5.h": "Einstellungen auf einer Seite", "g5.p": "Download-Ordner, Doppelklick-Verhalten, Erscheinungsbild, Sprache und Updates mit einem Klick." },
+    "oss.kicker": "Open Source", "oss.title": "MIT-lizenziert. Stern vergeben, forken, übersetzen.", "oss.sub": "Neat NAS ist mit Rust, Tauri und React gebaut, jede Zeile liegt auf GitHub. Fehlerberichte, Übersetzungen und Pull Requests sind willkommen.", "oss.btn": "Auf GitHub ansehen", "oss.issue": "Fehler melden", "gallery.kicker": "In Aktion", "gallery.title": "Sechs Details, die einen genauen Blick lohnen", "g1.h": "Übersicht", "g1.p": "Die Leertaste öffnet Fotos, Video, PDF und Text direkt vom NAS; die Pfeiltasten blättern durch den Ordner.", "g2.h": "Einmal gespeichert, immer da", "g2.p": "Dein NAS wohnt in der Seitenleiste und ist verbunden, sobald die App aufgeht.", "g3.h": "Übertragungen, auf die Verlass ist", "g3.p": "Fortschritt, Pause und Fortsetzen in einem kleinen Fenster; unterbrochene Übertragungen machen dort weiter, wo sie waren.", "g4.h": "Dein NAS findet dich", "g4.p": "Der Dialog listet jeden SMB-Server im Netzwerk: einen auswählen, Passwort einmal eingeben, fertig.", "g5.h": "Erscheinungsbild und Sprache", "g5.p": "Hell, dunkel oder automatisch und zehn Oberflächensprachen, umgeschaltet ohne Neustart.", "g6.h": "Fotoraster ohne Wartezeit", "g6.p": "Miniaturen stammen aus der Vorschau, die Kameras in jedes Foto einbetten; RAW- und HEIC-Ordner füllen sich sofort." },
   es: { name: "Español",
     "nav.features": "Funciones", "nav.download": "Descargar",
     "hero.eyebrow": "macOS · Windows · Gratis y de código abierto",
@@ -411,7 +414,7 @@ const I18N = {
     "s1.h": "Instala", "s1.p": "Abre el .dmg en macOS o ejecuta el instalador en Windows. Sin permisos de administrador.",
     "s2.h": "Elige tu NAS", "s2.p": "Normalmente ya está en la lista. Escribe usuario y contraseña una vez; van al llavero.",
     "s3.h": "Listo", "s3.p": "Desde ahora, abrir Neat NAS es abrir tus archivos.",
-    "oss.kicker": "Código abierto", "oss.title": "Licencia MIT. Dale una estrella, haz un fork, tradúcelo.", "oss.sub": "Neat NAS está hecho con Rust, Tauri y React, y cada línea está en GitHub. Se agradecen informes de errores, traducciones y pull requests.", "oss.btn": "Ver en GitHub", "oss.issue": "Informar de un error", "gallery.kicker": "En acción", "gallery.title": "Toda la app, de un vistazo", "g1.h": "Vista rápida", "g1.p": "La barra espaciadora abre fotos, vídeo, PDF y texto directamente desde el NAS; las flechas recorren la carpeta.", "g2.h": "Carpetas que cargan al instante", "g2.p": "Lista o cuadrícula, ordenables, con un buscador que filtra mientras escribes.", "g3.h": "Transferencias de confianza", "g3.p": "Progreso, pausa y reanudación en un pequeño panel; las transferencias interrumpidas siguen donde se quedaron.", "g4.h": "Tu NAS te encuentra", "g4.p": "El diálogo de añadir lista todos los servidores SMB de la red: elige uno, escribe la contraseña una vez y listo.", "g5.h": "Ajustes que caben en una pantalla", "g5.p": "Carpeta de descargas, comportamiento del doble clic, apariencia, idioma y actualizaciones con un clic." },
+    "oss.kicker": "Código abierto", "oss.title": "Licencia MIT. Dale una estrella, haz un fork, tradúcelo.", "oss.sub": "Neat NAS está hecho con Rust, Tauri y React, y cada línea está en GitHub. Se agradecen informes de errores, traducciones y pull requests.", "oss.btn": "Ver en GitHub", "oss.issue": "Informar de un error", "gallery.kicker": "En acción", "gallery.title": "Seis detalles que merecen un vistazo de cerca", "g1.h": "Vista rápida", "g1.p": "La barra espaciadora abre fotos, vídeo, PDF y texto directamente desde el NAS; las flechas recorren la carpeta.", "g2.h": "Guardado una vez, siempre ahí", "g2.p": "Tu NAS vive en la barra lateral y está conectado en cuanto se abre la app.", "g3.h": "Transferencias de confianza", "g3.p": "Progreso, pausa y reanudación en un pequeño panel; las transferencias interrumpidas siguen donde se quedaron.", "g4.h": "Tu NAS te encuentra", "g4.p": "El diálogo de añadir lista todos los servidores SMB de la red: elige uno, escribe la contraseña una vez y listo.", "g5.h": "Apariencia e idioma", "g5.p": "Claro, oscuro o automático, y diez idiomas de interfaz, sin reiniciar.", "g6.h": "Cuadrículas de fotos al instante", "g6.p": "Las miniaturas salen de la vista previa que la cámara incrusta en cada foto; las carpetas RAW y HEIC se llenan enseguida." },
   fr: { name: "Français",
     "nav.features": "Fonctions", "nav.download": "Télécharger",
     "hero.eyebrow": "macOS · Windows · Gratuit et open source",
@@ -439,7 +442,7 @@ const I18N = {
     "s1.h": "Installez", "s1.p": "Ouvrez le .dmg sur macOS ou lancez l’installeur sur Windows. Aucun droit administrateur nécessaire.",
     "s2.h": "Choisissez votre NAS", "s2.p": "Il est généralement déjà dans la liste. Saisissez nom d’utilisateur et mot de passe une fois ; ils rejoignent le trousseau.",
     "s3.h": "C’est tout", "s3.p": "Désormais, ouvrir Neat NAS, c’est ouvrir vos fichiers.",
-    "oss.kicker": "Open source", "oss.title": "Licence MIT. Une étoile, un fork, une traduction.", "oss.sub": "Neat NAS est construit avec Rust, Tauri et React, et chaque ligne est sur GitHub. Rapports de bugs, traductions et pull requests sont les bienvenus.", "oss.btn": "Voir sur GitHub", "oss.issue": "Signaler un bug", "gallery.kicker": "En action", "gallery.title": "Toute l’app, d’un coup d’œil", "g1.h": "Coup d’œil", "g1.p": "La barre d’espace ouvre photos, vidéo, PDF et texte directement depuis le NAS ; les flèches parcourent le dossier.", "g2.h": "Des dossiers instantanés", "g2.p": "Liste ou grille, triables, avec un champ de recherche qui filtre à la frappe.", "g3.h": "Des transferts fiables", "g3.p": "Progression, pause et reprise dans un petit panneau ; un transfert interrompu reprend là où il s’est arrêté.", "g4.h": "Votre NAS vous trouve", "g4.p": "La fenêtre d’ajout liste tous les serveurs SMB du réseau : choisissez-en un, saisissez le mot de passe une fois, c’est fait.", "g5.h": "Des réglages qui tiennent sur un écran", "g5.p": "Dossier de téléchargement, comportement du double-clic, apparence, langue et mises à jour en un clic." },
+    "oss.kicker": "Open source", "oss.title": "Licence MIT. Une étoile, un fork, une traduction.", "oss.sub": "Neat NAS est construit avec Rust, Tauri et React, et chaque ligne est sur GitHub. Rapports de bugs, traductions et pull requests sont les bienvenus.", "oss.btn": "Voir sur GitHub", "oss.issue": "Signaler un bug", "gallery.kicker": "En action", "gallery.title": "Six détails qui méritent un coup d’œil de près", "g1.h": "Coup d’œil", "g1.p": "La barre d’espace ouvre photos, vidéo, PDF et texte directement depuis le NAS ; les flèches parcourent le dossier.", "g2.h": "Enregistré une fois, toujours là", "g2.p": "Votre NAS vit dans la barre latérale et est connecté dès l’ouverture de l’app.", "g3.h": "Des transferts fiables", "g3.p": "Progression, pause et reprise dans un petit panneau ; un transfert interrompu reprend là où il s’est arrêté.", "g4.h": "Votre NAS vous trouve", "g4.p": "La fenêtre d’ajout liste tous les serveurs SMB du réseau : choisissez-en un, saisissez le mot de passe une fois, c’est fait.", "g5.h": "Apparence et langue", "g5.p": "Clair, sombre ou automatique, et dix langues d’interface, sans redémarrer.", "g6.h": "Des grilles de photos instantanées", "g6.p": "Les vignettes viennent de l’aperçu que l’appareil intègre dans chaque photo ; les dossiers RAW et HEIC se remplissent aussitôt." },
   "pt-BR": { name: "Português",
     "nav.features": "Recursos", "nav.download": "Baixar",
     "hero.eyebrow": "macOS · Windows · Grátis e open source",
@@ -467,7 +470,7 @@ const I18N = {
     "s1.h": "Instale", "s1.p": "Abra o .dmg no macOS ou rode o instalador no Windows. Sem direitos de administrador.",
     "s2.h": "Escolha seu NAS", "s2.p": "Ele costuma já estar na lista. Digite usuário e senha uma vez; eles vão para as chaves do sistema.",
     "s3.h": "Pronto", "s3.p": "A partir de agora, abrir o Neat NAS é abrir seus arquivos.",
-    "oss.kicker": "Open source", "oss.title": "Licença MIT. Dê uma estrela, faça um fork, traduza.", "oss.sub": "O Neat NAS é feito com Rust, Tauri e React, e cada linha está no GitHub. Relatos de bugs, traduções e pull requests são bem-vindos.", "oss.btn": "Ver no GitHub", "oss.issue": "Relatar um bug", "gallery.kicker": "Em ação", "gallery.title": "O app inteiro, num relance", "g1.h": "Visualização Rápida", "g1.p": "A barra de espaço abre fotos, vídeo, PDF e texto direto do NAS; as setas percorrem a pasta.", "g2.h": "Pastas que abrem na hora", "g2.p": "Lista ou grade, com ordenação e uma busca que filtra enquanto você digita.", "g3.h": "Transferências confiáveis", "g3.p": "Progresso, pausa e retomada num painel pequeno; transferências interrompidas continuam de onde pararam.", "g4.h": "Seu NAS encontra você", "g4.p": "O diálogo de adicionar lista todos os servidores SMB da rede: escolha um, digite a senha uma vez, pronto.", "g5.h": "Configurações que cabem numa tela", "g5.p": "Pasta de downloads, comportamento do clique duplo, aparência, idioma e atualizações com um clique." },
+    "oss.kicker": "Open source", "oss.title": "Licença MIT. Dê uma estrela, faça um fork, traduza.", "oss.sub": "O Neat NAS é feito com Rust, Tauri e React, e cada linha está no GitHub. Relatos de bugs, traduções e pull requests são bem-vindos.", "oss.btn": "Ver no GitHub", "oss.issue": "Relatar um bug", "gallery.kicker": "Em ação", "gallery.title": "Seis detalhes que merecem um olhar de perto", "g1.h": "Visualização Rápida", "g1.p": "A barra de espaço abre fotos, vídeo, PDF e texto direto do NAS; as setas percorrem a pasta.", "g2.h": "Salvo uma vez, sempre ali", "g2.p": "Seu NAS mora na barra lateral e já está conectado quando o app abre.", "g3.h": "Transferências confiáveis", "g3.p": "Progresso, pausa e retomada num painel pequeno; transferências interrompidas continuam de onde pararam.", "g4.h": "Seu NAS encontra você", "g4.p": "O diálogo de adicionar lista todos os servidores SMB da rede: escolha um, digite a senha uma vez, pronto.", "g5.h": "Aparência e idioma", "g5.p": "Claro, escuro ou automático, e dez idiomas de interface, sem reiniciar.", "g6.h": "Grades de fotos instantâneas", "g6.p": "As miniaturas vêm da prévia que a câmera embute em cada foto; pastas RAW e HEIC se preenchem na hora." },
   ru: { name: "Русский",
     "nav.features": "Возможности", "nav.download": "Скачать",
     "hero.eyebrow": "macOS · Windows · Бесплатно и с открытым кодом",
@@ -495,7 +498,7 @@ const I18N = {
     "s1.h": "Установите", "s1.p": "Откройте .dmg на macOS или запустите установщик на Windows. Права администратора не нужны.",
     "s2.h": "Выберите NAS", "s2.p": "Обычно он уже в списке. Введите имя пользователя и пароль один раз, они попадут в связку ключей.",
     "s3.h": "Готово", "s3.p": "Теперь открыть Neat NAS значит открыть свои файлы.",
-    "oss.kicker": "Открытый код", "oss.title": "Лицензия MIT. Ставьте звезду, форкайте, переводите.", "oss.sub": "Neat NAS написан на Rust, Tauri и React, и каждая строка лежит на GitHub. Сообщения об ошибках, переводы и pull request приветствуются.", "oss.btn": "Открыть на GitHub", "oss.issue": "Сообщить об ошибке", "gallery.kicker": "В деле", "gallery.title": "Всё приложение с одного взгляда", "g1.h": "Быстрый просмотр", "g1.p": "Пробел открывает фото, видео, PDF и текст прямо с NAS; стрелки листают папку.", "g2.h": "Папки открываются мгновенно", "g2.p": "Список или сетка, сортировка и поиск, который фильтрует по мере ввода.", "g3.h": "Передачи, на которые можно положиться", "g3.p": "Прогресс, пауза и продолжение в маленькой панели; прерванные передачи продолжаются с места остановки.", "g4.h": "NAS находит вас сам", "g4.p": "Окно добавления показывает все SMB-серверы в сети: выберите один, введите пароль один раз, готово.", "g5.h": "Настройки на одном экране", "g5.p": "Папка загрузок, действие двойного щелчка, оформление, язык и обновления в один щелчок." },
+    "oss.kicker": "Открытый код", "oss.title": "Лицензия MIT. Ставьте звезду, форкайте, переводите.", "oss.sub": "Neat NAS написан на Rust, Tauri и React, и каждая строка лежит на GitHub. Сообщения об ошибках, переводы и pull request приветствуются.", "oss.btn": "Открыть на GitHub", "oss.issue": "Сообщить об ошибке", "gallery.kicker": "В деле", "gallery.title": "Шесть деталей, на которые стоит взглянуть поближе", "g1.h": "Быстрый просмотр", "g1.p": "Пробел открывает фото, видео, PDF и текст прямо с NAS; стрелки листают папку.", "g2.h": "Сохранён один раз, всегда рядом", "g2.p": "Ваш NAS живёт в боковой панели и уже подключён, когда открывается приложение.", "g3.h": "Передачи, на которые можно положиться", "g3.p": "Прогресс, пауза и продолжение в маленькой панели; прерванные передачи продолжаются с места остановки.", "g4.h": "NAS находит вас сам", "g4.p": "Окно добавления показывает все SMB-серверы в сети: выберите один, введите пароль один раз, готово.", "g5.h": "Оформление и язык", "g5.p": "Светлая, тёмная или автоматическая тема и десять языков интерфейса, без перезапуска.", "g6.h": "Мгновенные сетки фото", "g6.p": "Миниатюры берутся из превью, встроенного камерой в каждый снимок; папки RAW и HEIC заполняются сразу." },
 };
 const EN = {};
 document.querySelectorAll("[data-i18n]").forEach(el => EN[el.dataset.i18n] = el.textContent);
