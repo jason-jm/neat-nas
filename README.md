@@ -13,7 +13,7 @@ immediately, no address to remember, no mounting.
 - Quick Look style preview for images, video, audio, PDF and text, streamed straight from the share over the `nasfile://` protocol (no download first)
 - Grid view with thumbnails (EXIF-embedded thumbnails when available, so photos and HEIC previews need only the file header)
 - Drag files out of the app into Finder (macOS, via file promises) and drop files from Finder/Explorer into the app to upload
-- English and Simplified Chinese UI, light and dark themes
+- UI in ten languages (English, 简体中文, 繁體中文, 日本語, 한국어, Deutsch, Español, Français, Português do Brasil, Русский), light and dark themes
 
 ## Install
 

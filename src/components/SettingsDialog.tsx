@@ -2,7 +2,7 @@ import { useState } from "react";
 import { CircleCheck, Download, FolderOpen, LoaderCircle, RefreshCw, RotateCcw } from "lucide-react";
 import type { Settings, UpdateInfo, UpdateProgress } from "../types";
 import { api, errorOf } from "../api";
-import { useI18n, type LocalePref } from "../i18n";
+import { LOCALES, useI18n, type LocalePref } from "../i18n";
 import { Button, Modal } from "./ui";
 
 export type UpdateState =
@@ -91,8 +91,11 @@ export function SettingsDialog({ settings, showHidden, onShowHidden, version, up
         <label>{t("settings.language")}</label>
         <select className="input" value={localePref} onChange={(e) => setLocalePref(e.target.value as LocalePref)}>
           <option value="system">{t("settings.system")}</option>
-          <option value="en">English</option>
-          <option value="zh-CN">简体中文</option>
+          {LOCALES.map((l) => (
+            <option key={l.code} value={l.code}>
+              {l.name}
+            </option>
+          ))}
         </select>
       </div>
       <div className="field">
