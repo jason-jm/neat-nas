@@ -28,6 +28,45 @@ export function previewKind(entry: Entry): PreviewKind {
 
 export const isPreviewable = (entry: Entry) => previewKind(entry) !== "none";
 
+/** Legacy code page to assume for text that is not UTF-8, by UI language. */
+function legacyEncoding(locale: string): string {
+  if (locale === "zh-CN") return "gb18030";
+  if (locale === "zh-TW") return "big5";
+  if (locale === "ja") return "shift_jis";
+  if (locale === "ko") return "euc-kr";
+  return "windows-1252";
+}
+
+/**
+ * Decodes text for display: UTF-16 with a BOM, then strict UTF-8, then the
+ * legacy code page for the UI language (NFO files and old notes on a NAS
+ * are often GBK/Big5). A truncated read may end mid-character, so a UTF-8
+ * failure is retried without the last few bytes before giving up on it.
+ */
+function decodeText(buffer: ArrayBuffer, truncated: boolean, locale: string): string {
+  const bytes = new Uint8Array(buffer);
+  if (bytes.length >= 2 && bytes[0] === 0xff && bytes[1] === 0xfe) return new TextDecoder("utf-16le").decode(bytes.subarray(2));
+  if (bytes.length >= 2 && bytes[0] === 0xfe && bytes[1] === 0xff) return new TextDecoder("utf-16be").decode(bytes.subarray(2));
+  const utf8 = new TextDecoder("utf-8", { fatal: true });
+  try {
+    return utf8.decode(bytes);
+  } catch {
+    /* not valid UTF-8 as a whole */
+  }
+  if (truncated) {
+    try {
+      return utf8.decode(bytes.subarray(0, Math.max(0, bytes.length - 3)));
+    } catch {
+      /* still not UTF-8 */
+    }
+  }
+  try {
+    return new TextDecoder(legacyEncoding(locale)).decode(bytes);
+  } catch {
+    return new TextDecoder("utf-8").decode(bytes);
+  }
+}
+
 interface Props {
   serverId: string;
   share: string;
@@ -38,6 +77,12 @@ interface Props {
   onDownload: (entry: Entry) => void;
 }
 
+/**
+ * Quick Look: an opaque panel floating over the browser with margins all
+ * round, so the window behind stays visible and the panel never reaches
+ * the native window controls. Title, pager, download and close live in
+ * the panel's own header; the stage below shows the file.
+ */
 export function PreviewModal({ serverId, share, entries, index, onIndexChange, onClose, onDownload }: Props) {
   const { t, locale } = useI18n();
   const entry = entries[index];
@@ -58,18 +103,19 @@ export function PreviewModal({ serverId, share, entries, index, onIndexChange, o
     if (!entry || kind !== "text" || !url) return;
     let cancelled = false;
     setTextLoading(true);
+    const truncated = entry.size > MAX_TEXT;
     fetch(url, { headers: { Range: `bytes=0-${MAX_TEXT - 1}` } })
       .then(async (r) => {
         if (!r.ok && r.status !== 206) throw new Error(`${r.status}`);
-        const body = await r.text();
-        if (!cancelled) setText({ body, truncated: entry.size > MAX_TEXT });
+        const body = decodeText(await r.arrayBuffer(), truncated, locale);
+        if (!cancelled) setText({ body, truncated });
       })
       .catch((e) => !cancelled && setFailed(String(e)))
       .finally(() => !cancelled && setTextLoading(false));
     return () => {
       cancelled = true;
     };
-  }, [entry, kind, url]);
+  }, [entry, kind, url, locale]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -85,7 +131,7 @@ export function PreviewModal({ serverId, share, entries, index, onIndexChange, o
 
   if (!entry) return null;
 
-  const body = () => {
+  const stage = () => {
     if (failed) {
       return (
         <div className="preview-empty">
@@ -93,7 +139,7 @@ export function PreviewModal({ serverId, share, entries, index, onIndexChange, o
             <FileQuestion size={32} />
           </div>
           <div>{t("preview.failed")}</div>
-          <div style={{ fontSize: 12, opacity: 0.7 }}>{failed}</div>
+          <div className="preview-empty-detail">{failed}</div>
         </div>
       );
     }
@@ -101,7 +147,7 @@ export function PreviewModal({ serverId, share, entries, index, onIndexChange, o
       case "image":
         return (
           <>
-            {loading && <LoaderCircle className="spin" size={28} color="#fff" style={{ position: "absolute" }} />}
+            {loading && <LoaderCircle className="spin preview-spinner" size={28} />}
             <img
               src={url}
               alt={entry.name}
@@ -122,7 +168,7 @@ export function PreviewModal({ serverId, share, entries, index, onIndexChange, o
         return <iframe src={url} title={entry.name} />;
       case "text":
         return loading ? (
-          <LoaderCircle className="spin" size={28} color="#fff" />
+          <LoaderCircle className="spin preview-spinner" size={28} />
         ) : (
           <>
             <pre>{text?.body ?? ""}</pre>
@@ -147,34 +193,39 @@ export function PreviewModal({ serverId, share, entries, index, onIndexChange, o
 
   return createPortal(
     <div
-      className="preview-backdrop"
+      className="preview-scrim"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="preview-head">
-        <span className="title">
-          <span className="name">{entry.name}</span>
-          <span className="meta">
-            {entry.isDir ? "" : formatBytes(entry.size)} · {formatDate(entry.modified, locale)} · {t("preview.of", { i: index + 1, n: entries.length })}
-          </span>
-        </span>
-        <Button onClick={() => onDownload(entry)} title={t("browser.download")}>
-          <Download size={14} />
-          {t("browser.download")}
-        </Button>
-        <Button iconOnly onClick={onClose} title="Esc">
-          <X size={16} />
-        </Button>
-      </div>
-      <div className="preview-body" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-        <button type="button" className="preview-nav prev" disabled={index === 0} onClick={() => onIndexChange(index - 1)}>
-          <ChevronLeft size={20} />
-        </button>
-        {body()}
-        <button type="button" className="preview-nav next" disabled={index >= entries.length - 1} onClick={() => onIndexChange(index + 1)}>
-          <ChevronRight size={20} />
-        </button>
+      <div className="preview-panel" role="dialog" aria-label={entry.name}>
+        <div className="preview-head">
+          <div className="preview-title">
+            <span className="name" title={entry.name}>
+              {entry.name}
+            </span>
+            <span className="meta">
+              {formatBytes(entry.size)} · {formatDate(entry.modified, locale)}
+            </span>
+          </div>
+          <div className="preview-pager">
+            <Button variant="ghost" iconOnly disabled={index === 0} onClick={() => onIndexChange(index - 1)} title="←">
+              <ChevronLeft size={16} />
+            </Button>
+            <span className="count">{t("preview.of", { i: index + 1, n: entries.length })}</span>
+            <Button variant="ghost" iconOnly disabled={index >= entries.length - 1} onClick={() => onIndexChange(index + 1)} title="→">
+              <ChevronRight size={16} />
+            </Button>
+          </div>
+          <Button onClick={() => onDownload(entry)} title={t("browser.download")}>
+            <Download size={14} />
+            {t("browser.download")}
+          </Button>
+          <Button variant="ghost" iconOnly onClick={onClose} title="Esc">
+            <X size={16} />
+          </Button>
+        </div>
+        <div className="preview-stage">{stage()}</div>
       </div>
     </div>,
     document.body,
