@@ -49,7 +49,7 @@ Neat NAS is a small desktop app that does one thing well: it opens on your NAS. 
 
 ## Install
 
-**macOS 11+** (Apple Silicon and Intel, one universal build): open the `.dmg` and drag Neat NAS to Applications. The app is not notarized by Apple yet, so the first launch shows a warning that macOS cannot verify it: open System Settings → Privacy & Security, scroll down and click **Open Anyway**. On macOS 14 and earlier you can right-click the app and choose Open instead.
+**macOS 11+** (Apple Silicon and Intel, one universal build): open the `.dmg` and drag Neat NAS to Applications. It is signed with a Developer ID and notarized by Apple, so it opens like any other app you download.
 
 **Windows 10/11**: run the `-setup.exe`. It installs for the current user, no admin rights needed. Until the installer is code-signed, SmartScreen shows "Windows protected your PC" → More info → Run anyway.
 
