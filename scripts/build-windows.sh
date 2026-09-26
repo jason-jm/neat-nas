@@ -16,6 +16,7 @@
 # is already set).
 set -euo pipefail
 cd "$(dirname "$0")/.."
+scripts/collect-release.sh check
 source "$HOME/.cargo/env" 2>/dev/null || true
 export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
 

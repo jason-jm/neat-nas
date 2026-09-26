@@ -23,7 +23,7 @@ jobs:
             args: --target universal-apple-darwin
           - name: Windows x64
             os: windows-latest
-            args: ""
+            args: --bundles nsis
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -37,19 +37,31 @@ jobs:
         with:
           workspaces: src-tauri
       - run: npm ci
-      - uses: tauri-apps/tauri-action@v0
+      # Developer ID signing + notarization is optional. Export only the Apple
+      # credentials that exist: a missing secret would otherwise arrive as an
+      # empty string and override the ad-hoc identity in tauri.conf.json.
+      - name: Apple signing credentials, if configured
+        if: matrix.os == 'macos-latest'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Updater artifact signing (see RELEASE.md)
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-          # macOS code signing + notarization (optional until you have an Apple Developer account)
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          for v in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID; do
+            if [ -n "${!v}" ]; then
+              { echo "$v<<__NEATNAS_EOF__"; printf '%s\n' "${!v}"; echo "__NEATNAS_EOF__"; } >> "$GITHUB_ENV"
+              echo "using $v"
+            fi
+          done
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Updater artifact signing (see RELEASE.md)
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           tagName: ${{ github.ref_name }}
           releaseName: "Neat NAS ${{ github.ref_name }}"
@@ -57,6 +69,7 @@ jobs:
           releaseDraft: true
           prerelease: false
           includeUpdaterJson: true
+          updaterJsonPreferNsis: true
           args: ${{ matrix.args }}
       # The same app without an installer, attached next to the .dmg and .exe.
       - name: Attach the zipped app (macOS)

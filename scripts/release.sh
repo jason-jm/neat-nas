@@ -8,6 +8,7 @@
 #   scripts/release.sh 1.0.1 notes.md   # explicit release notes
 set -euo pipefail
 cd "$(dirname "$0")/.."
+source "$HOME/.cargo/env" 2>/dev/null || true
 version="${1:?usage: release.sh X.Y.Z [notes.md]}"
 tag="v$version"
 repo="jason-jm/neat-nas"
@@ -54,6 +55,39 @@ conclusion=$(gh run view "$run_id" --repo "$repo" --json conclusion --jq .conclu
 
 echo "== copying the release into release/$version and attaching SHA256SUMS.txt"
 scripts/collect-release.sh github "$tag"
+
+echo "== checking the updater manifest before publishing"
+assets=$(gh release view "$tag" --repo "$repo" --json assets --jq '.assets[].name')
+python3 - "release/$version/updater/latest.json" "$version" "$tag" "$repo" "$assets" <<'PY'
+import json, sys, urllib.parse
+path, version, tag, repo, assets = sys.argv[1:]
+assets = set(assets.split("\n"))
+m = json.load(open(path))
+plat = m.get("platforms", {})
+problems = []
+if m.get("version") != version:
+    problems.append(f"version is {m.get('version')!r}, expected {version}")
+prefix = f"https://github.com/{repo}/releases/download/{tag}/"
+for key, suffix in {"darwin-aarch64": ".app.tar.gz", "darwin-x86_64": ".app.tar.gz", "windows-x86_64": "-setup.exe"}.items():
+    entry = plat.get(key)
+    if not entry:
+        problems.append(f"no {key} entry")
+        continue
+    url = entry.get("url", "")
+    name = urllib.parse.unquote(url.rsplit("/", 1)[-1])
+    if not entry.get("signature"):
+        problems.append(f"{key} has no signature")
+    if not url.startswith(prefix):
+        problems.append(f"{key} does not point at {tag}: {url}")
+    if not name.endswith(suffix):
+        problems.append(f"{key} is not a {suffix} file: {name}")
+    if name not in assets:
+        problems.append(f"{key} points at {name}, which the release does not have")
+if problems:
+    print("latest.json is not right, so the draft stays unpublished:\n  " + "\n  ".join(problems))
+    sys.exit(1)
+print("latest.json ok: " + ", ".join(sorted(plat)))
+PY
 gh release upload "$tag" "release/$version/SHA256SUMS.txt" --repo "$repo" --clobber
 
 echo "== publishing the draft release"

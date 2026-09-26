@@ -44,7 +44,8 @@
     "shortDescription": "A modern SMB NAS browser for Mac and Windows",
     "longDescription": "Neat NAS shows your home NAS the moment it opens: browse shares, preview photos, video and documents straight from the NAS, and move files between your computers with resumable transfers.",
     "macOS": {
-      "minimumSystemVersion": "11.0"
+      "minimumSystemVersion": "11.0",
+      "signingIdentity": "-"
     },
     "windows": {
       "nsis": {

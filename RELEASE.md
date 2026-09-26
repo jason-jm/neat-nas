@@ -5,7 +5,7 @@
 | Platform | Artifact | Notes |
 |---|---|---|
 | macOS | `Neat NAS_<version>_universal.dmg`, `Neat NAS_<version>_universal-mac.zip` | Universal binary (Apple Silicon + Intel). The zip is the same `.app` without the disk image. |
-| Windows | `Neat NAS_<version>_x64-setup.exe` (NSIS), `Neat NAS_<version>_x64-win.zip` | Per-user install in ten languages, WebView2 bootstrapped if missing. The zip holds the same `Neat NAS.exe` without an installer (it relies on the WebView2 runtime built into Windows 11 and current Windows 10). CI releases also carry an `.msi`. |
+| Windows | `Neat NAS_<version>_x64-setup.exe` (NSIS), `Neat NAS_<version>_x64-win.zip` | Per-user install in ten languages, WebView2 bootstrapped if missing. The zip holds the same `Neat NAS.exe` without an installer (it relies on the WebView2 runtime built into Windows 11 and current Windows 10). Only NSIS is built, locally and in CI, so the updater always installs the same way. |
 | Both | `SHA256SUMS.txt` | Checksums of the installable files above. |
 | Updater | `Neat NAS.app.tar.gz`, `.sig` files, `latest.json` | What running copies download; `latest.json` only exists when `TAURI_SIGNING_PRIVATE_KEY` is set. |
 
@@ -51,7 +51,9 @@ Add repository secrets:
 
 ### macOS signing and notarization (recommended)
 
-Unsigned builds work but Gatekeeper shows "cannot be opened because the developer cannot be verified"; users must right-click → Open once. With an Apple Developer account, add these secrets and the workflow signs and notarizes automatically:
+Builds are ad-hoc signed (`bundle.macOS.signingIdentity: "-"` in `tauri.conf.json`). Apple silicon needs at least that for apps downloaded from the internet: 1.0.0 was unsigned, which macOS can report as "damaged". An ad-hoc signed app still needs a one-time approval (System Settings → Privacy & Security → Open Anyway; right-click → Open on macOS 14 and earlier), and because its signature changes with every build, macOS asks again for keychain access after each update.
+
+With an Apple Developer account, add these secrets and the workflow signs with your Developer ID and notarizes instead, which removes both prompts. The workflow exports only the `APPLE_*` variables that are set, so missing secrets never override the ad-hoc identity:
 
 - `APPLE_CERTIFICATE` (base64 of the exported `.p12`), `APPLE_CERTIFICATE_PASSWORD`
 - `APPLE_SIGNING_IDENTITY` (e.g. `Developer ID Application: Your Name (TEAMID)`)

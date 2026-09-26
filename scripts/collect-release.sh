@@ -3,6 +3,7 @@
 #
 #   scripts/collect-release.sh [mac|windows|all|sums]     (default: all)
 #   scripts/collect-release.sh github vX.Y.Z              (copy a GitHub release)
+#   scripts/collect-release.sh check                      (fail if this version is on GitHub)
 #
 # Result, per version:
 #   Neat NAS_<v>_universal.dmg       macOS disk image
@@ -26,8 +27,19 @@ else
   version=$(node -p "require('./package.json').version")
 fi
 out="release/$version"
-mkdir -p "$out/updater"
 got=0
+
+# release/<v> of a published version must keep exactly the published files,
+# so local builds of that version are never collected over them.
+ensure_unpublished() {
+  if gh release view "v$version" --repo "$repo" >/dev/null 2>&1; then
+    echo "v$version is already on GitHub, so release/$version keeps the published files."
+    echo "Bump the version before building (scripts/release.sh does), or copy it with: scripts/collect-release.sh github v$version"
+    exit 1
+  fi
+}
+if [ "$mode" = check ]; then ensure_unpublished; exit 0; fi
+mkdir -p "$out/updater"
 
 collect_mac() {
   local b="src-tauri/target/universal-apple-darwin/release/bundle"
@@ -100,16 +112,17 @@ write_sums() {
 }
 
 case "$mode" in
-  mac) collect_mac ;;
-  windows) collect_windows ;;
+  mac) ensure_unpublished; collect_mac ;;
+  windows) ensure_unpublished; collect_windows ;;
   all)
+    ensure_unpublished
     collect_mac
     collect_windows
     if [ "$got" != 1 ]; then echo "no $version builds found; run scripts/build-mac.sh or scripts/build-windows.sh"; exit 1; fi
     ;;
   github) collect_github ;;
   sums) ;;
-  *) echo "usage: collect-release.sh [mac|windows|all|sums] | github vX.Y.Z"; exit 1 ;;
+  *) echo "usage: collect-release.sh [mac|windows|all|sums|check] | github vX.Y.Z"; exit 1 ;;
 esac
 write_sums
 echo "$out:"

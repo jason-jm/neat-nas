@@ -6,6 +6,7 @@
 # The updater signature needs ~/.tauri/neatnas.key (or TAURI_SIGNING_PRIVATE_KEY).
 set -euo pipefail
 cd "$(dirname "$0")/.."
+scripts/collect-release.sh check
 source "$HOME/.cargo/env" 2>/dev/null || true
 for t in aarch64-apple-darwin x86_64-apple-darwin; do
   rustup target list --installed | grep -qx "$t" || rustup target add "$t"
