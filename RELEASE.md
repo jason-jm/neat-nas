@@ -4,7 +4,7 @@
 
 | Platform | Artifact | Notes |
 |---|---|---|
-| macOS | `Neat NAS_<version>_universal.dmg`, `Neat NAS_<version>_universal-mac.zip` | Universal binary (Apple Silicon + Intel). The zip is the same `.app` without the disk image. |
+| macOS | `Neat NAS_<version>_universal.dmg`, `Neat NAS_<version>_universal-mac.zip` | Universal binary (Apple Silicon + Intel), signed with the Developer ID and notarized by Apple. The zip is the same `.app` without the disk image. |
 | Windows | `Neat NAS_<version>_x64-setup.exe` (NSIS), `Neat NAS_<version>_x64-win.zip` | Per-user install in ten languages, WebView2 bootstrapped if missing. The zip holds the same `Neat NAS.exe` without an installer (it relies on the WebView2 runtime built into Windows 11 and current Windows 10). Only NSIS is built, locally and in CI, so the updater always installs the same way. |
 | Both | `SHA256SUMS.txt` | Checksums of the installable files above. |
 | Updater | `Neat NAS.app.tar.gz`, `.sig` files, `latest.json` | What running copies download; `latest.json` only exists when `TAURI_SIGNING_PRIVATE_KEY` is set. |
@@ -13,23 +13,19 @@ Every release is also kept on this Mac in `release/<version>/` (gitignored): the
 
 ## Cutting a release
 
-The whole flow is one command; the steps below are what it does.
+The whole flow is one command on this Mac; the steps below are what it does.
 
 ```bash
-scripts/release.sh 1.0.1
+scripts/release.sh 1.0.2
 ```
 
-1. Bump the version in `package.json`, `src-tauri/Cargo.toml` and `src-tauri/tauri.conf.json` (keep them identical), commit and push.
-2. Tag and push the tag:
-   ```bash
-   git tag v1.0.1
-   git push origin v1.0.1
-   ```
-3. The `Release` workflow (`.github/workflows/release.yml`) builds macOS (universal) and Windows (x64) on GitHub's runners and opens a **draft** release with the installers, the zipped apps, the updater artifacts and `latest.json` attached.
-4. The script copies the draft into `release/<version>/`, attaches `SHA256SUMS.txt`, and publishes the draft.
+1. It checks that the Developer ID and the notarization profile work, bumps the version in `package.json`, `src-tauri/Cargo.toml` and `src-tauri/tauri.conf.json`, commits, tags and pushes.
+2. The `Release` workflow (`.github/workflows/release.yml`) builds the Windows installer and zip on GitHub and opens a **draft** release with them and `latest.json`. Meanwhile this Mac builds the universal macOS app, signs it with the Developer ID and has Apple notarize the app and the disk image (`scripts/build-mac.sh`).
+3. The script uploads the macOS files to the draft and adds them to `latest.json`.
+4. It copies the draft into `release/<version>/`, checks `latest.json`, attaches `SHA256SUMS.txt`, and publishes.
 5. Publishing makes `latest.json` reachable at `https://github.com/jason-jm/neat-nas/releases/latest/download/latest.json`, which is what running copies poll. The repository and its releases must stay public for that.
 
-If the workflow is unavailable, the same release can be built on this Mac and uploaded with `scripts/publish-release.sh` (see "Building locally").
+Releases need this Mac, because the Developer ID key stays in its keychain and is never uploaded anywhere. If GitHub Actions is unavailable, build both platforms here and upload them with `scripts/publish-release.sh` (see "Building locally").
 
 ## One-time setup
 
@@ -49,15 +45,13 @@ Add repository secrets:
 - `TAURI_SIGNING_PRIVATE_KEY` = contents of `~/.tauri/neatnas.key`
 - `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` = empty (the key has no password)
 
-### macOS signing and notarization (recommended)
+### macOS signing and notarization
 
-Builds are ad-hoc signed (`bundle.macOS.signingIdentity: "-"` in `tauri.conf.json`). Apple silicon needs at least that for apps downloaded from the internet: 1.0.0 was unsigned, which macOS can report as "damaged". An ad-hoc signed app still needs a one-time approval (System Settings → Privacy & Security → Open Anyway; right-click → Open on macOS 14 and earlier), and because its signature changes with every build, macOS asks again for keychain access after each update.
+`scripts/build-mac.sh` signs with the first "Developer ID Application" identity in the login keychain and notarizes with the notarytool keychain profile `WAVESUBS_NOTARY`, the saved credentials Wave Subs uses too (override with `APPLE_SIGNING_IDENTITY` and `APPLE_KEYCHAIN_PROFILE`). `scripts/notarize-mac.sh` has Apple notarize the app, then rebuilds the disk image around the stapled app, signs it and has it notarized as well, so both open without warnings, even offline. The updater archive keeps the app as Tauri built it: copies installed by the in-app updater are not quarantined, and its minisign signature must stay valid. Because every version carries the same Developer ID, macOS keeps the app's keychain access across updates.
 
-With an Apple Developer account, add these secrets and the workflow signs with your Developer ID and notarizes instead, which removes both prompts. The workflow exports only the `APPLE_*` variables that are set, so missing secrets never override the ad-hoc identity:
+On a Mac without the identity the build falls back to ad-hoc signing (`signingIdentity: "-"` in `tauri.conf.json`), the minimum Apple silicon needs for downloaded apps. Such builds cannot be notarized: users approve them once in System Settings → Privacy & Security, and macOS asks again for keychain access after every update. That is how 1.0.1 shipped; 1.0.0 was not signed at all.
 
-- `APPLE_CERTIFICATE` (base64 of the exported `.p12`), `APPLE_CERTIFICATE_PASSWORD`
-- `APPLE_SIGNING_IDENTITY` (e.g. `Developer ID Application: Your Name (TEAMID)`)
-- `APPLE_ID`, `APPLE_PASSWORD` (an app-specific password), `APPLE_TEAM_ID`
+To save the notarization credentials on another Mac: `xcrun notarytool store-credentials WAVESUBS_NOTARY --apple-id <Apple ID> --team-id <team ID>` (it asks for an app-specific password from appleid.apple.com).
 
 ### Windows signing (optional)
 
@@ -66,7 +60,7 @@ Unsigned installers trigger SmartScreen ("Windows protected your PC" → More in
 ## Building locally
 
 ```bash
-scripts/build-mac.sh            # universal .dmg + zipped .app -> release/<version>/
+scripts/build-mac.sh            # universal .dmg + zipped .app, signed and notarized -> release/<version>/
 scripts/build-windows.sh        # installer + zipped .exe      -> release/<version>/ (see below)
 scripts/publish-release.sh v1.0.1   # uploads release/1.0.1/ as a GitHub release, with latest.json
 ```

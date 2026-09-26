@@ -32,8 +32,10 @@ got=0
 # release/<v> of a published version must keep exactly the published files,
 # so local builds of that version are never collected over them.
 ensure_unpublished() {
-  if gh release view "v$version" --repo "$repo" >/dev/null 2>&1; then
-    echo "v$version is already on GitHub, so release/$version keeps the published files."
+  local draft
+  draft=$(gh release view "v$version" --repo "$repo" --json isDraft --jq .isDraft 2>/dev/null || true)
+  if [ "$draft" = false ]; then
+    echo "v$version is already published, so release/$version keeps the published files."
     echo "Bump the version before building (scripts/release.sh does), or copy it with: scripts/collect-release.sh github v$version"
     exit 1
   fi
@@ -82,19 +84,23 @@ collect_windows() {
 }
 
 collect_github() {
-  local f name local_name
-  gh release download "$tag" --repo "$repo" --dir "$out" --clobber
-  shopt -s nullglob
-  for f in "$out"/*; do
-    [ -f "$f" ] || continue
-    name=$(basename "$f")
+  local assets work name digest local_name dest
+  # The releases list includes drafts, which releases/tags/<tag> does not.
+  assets=$(gh api "repos/$repo/releases?per_page=30" --jq ".[] | select(.tag_name == \"$tag\") | .assets[] | [.name, (.digest // \"\")] | @tsv")
+  [ -n "$assets" ] || { echo "no release $tag with files on GitHub"; exit 1; }
+  work=$(mktemp -d)
+  while IFS=$'\t' read -r name digest; do
     local_name="${name/#Neat.NAS/Neat NAS}"    # GitHub stores spaces as dots
     case "$name" in
-      *.sig|*.app.tar.gz|latest.json) mv -f "$f" "$out/updater/$local_name" ;;
-      *) if [ "$name" != "$local_name" ]; then mv -f "$f" "$out/$local_name"; fi ;;
+      *.sig|*.app.tar.gz|latest.json) dest="$out/updater/$local_name" ;;
+      *) dest="$out/$local_name" ;;
     esac
-  done
-  shopt -u nullglob
+    # Downloads from GitHub can be slow; skip files that are already here byte for byte.
+    if [ -n "$digest" ] && [ -f "$dest" ] && [ "sha256:$(shasum -a 256 "$dest" | cut -d' ' -f1)" = "$digest" ]; then continue; fi
+    gh release download "$tag" --repo "$repo" --pattern "$name" --dir "$work" --clobber
+    mv -f "$work/$name" "$dest"
+  done <<< "$assets"
+  rm -rf "$work"
   got=1
 }
 

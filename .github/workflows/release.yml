@@ -1,8 +1,9 @@
 name: Release
 
-# Push a tag like v1.0.0 to build installers for macOS (universal) and
-# Windows (x64), attach them to a draft GitHub release, and publish the
-# updater manifest (latest.json) when signing secrets are configured.
+# Pushed tags (scripts/release.sh pushes them) build the Windows installer and
+# zip here and attach them to a draft release. The macOS app is built, signed
+# with the Developer ID and notarized on the maintainer's Mac by the same
+# script, so the signing key never leaves that Mac; see RELEASE.md.
 on:
   push:
     tags: ["v*"]
@@ -11,19 +12,9 @@ permissions:
   contents: write
 
 jobs:
-  build:
-    name: Build (${{ matrix.name }})
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: macOS universal
-            os: macos-latest
-            args: --target universal-apple-darwin
-          - name: Windows x64
-            os: windows-latest
-            args: --bundles nsis
+  windows:
+    name: Build (Windows x64)
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -31,31 +22,10 @@ jobs:
           node-version: 22
           cache: npm
       - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.os == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: src-tauri
       - run: npm ci
-      # Developer ID signing + notarization is optional. Export only the Apple
-      # credentials that exist: a missing secret would otherwise arrive as an
-      # empty string and override the ad-hoc identity in tauri.conf.json.
-      - name: Apple signing credentials, if configured
-        if: matrix.os == 'macos-latest'
-        env:
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: |
-          for v in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID; do
-            if [ -n "${!v}" ]; then
-              { echo "$v<<__NEATNAS_EOF__"; printf '%s\n' "${!v}"; echo "__NEATNAS_EOF__"; } >> "$GITHUB_ENV"
-              echo "using $v"
-            fi
-          done
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -70,19 +40,10 @@ jobs:
           prerelease: false
           includeUpdaterJson: true
           updaterJsonPreferNsis: true
-          args: ${{ matrix.args }}
-      # The same app without an installer, attached next to the .dmg and .exe.
-      - name: Attach the zipped app (macOS)
-        if: matrix.os == 'macos-latest'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          version=$(node -p "require('./package.json').version")
-          zip="Neat NAS_${version}_universal-mac.zip"
-          ditto -c -k --sequesterRsrc --keepParent "src-tauri/target/universal-apple-darwin/release/bundle/macos/Neat NAS.app" "$zip"
-          gh release upload "$GITHUB_REF_NAME" "$zip" --clobber --repo "$GITHUB_REPOSITORY"
-      - name: Attach the zipped app (Windows)
-        if: matrix.os == 'windows-latest'
+          # NSIS only, as local builds and earlier releases, so updates always use the same installer.
+          args: --bundles nsis
+      # The same app without an installer, attached next to the .exe.
+      - name: Attach the zipped app
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
