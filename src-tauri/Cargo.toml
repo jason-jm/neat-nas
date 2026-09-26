@@ -1,6 +1,6 @@
 [package]
 name = "neatnas"
-version = "1.0.3"
+version = "1.0.4"
 description = "A modern SMB NAS browser for Mac and Windows"
 authors = ["Neat NAS contributors"]
 license = "MIT"
