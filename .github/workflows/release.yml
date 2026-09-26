@@ -90,7 +90,10 @@ jobs:
           $version = node -p "require('./package.json').version"
           $zip = "Neat NAS_${version}_x64-win.zip"
           # Take the exe from the installer: that copy carries the NSIS marker the updater reads.
-          7z e "src-tauri/target/release/bundle/nsis/Neat NAS_${version}_x64-setup.exe" neatnas.exe -oportable -y | Out-Null
+          $sevenZip = (Get-Command 7z -ErrorAction SilentlyContinue).Source
+          if (-not $sevenZip) { $sevenZip = "$env:ProgramFiles\7-Zip\7z.exe" }
+          & $sevenZip e "src-tauri/target/release/bundle/nsis/Neat NAS_${version}_x64-setup.exe" neatnas.exe -oportable -y | Out-Null
+          if (-not (Test-Path "portable/neatnas.exe")) { throw "could not extract neatnas.exe from the installer" }
           Rename-Item "portable/neatnas.exe" "Neat NAS.exe"
           Compress-Archive -LiteralPath "portable/Neat NAS.exe" -DestinationPath $zip -Force
           gh release upload $env:GITHUB_REF_NAME $zip --clobber --repo $env:GITHUB_REPOSITORY
