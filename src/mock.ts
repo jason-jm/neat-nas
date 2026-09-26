@@ -89,7 +89,17 @@ const tree: Record<string, Spec> = {
     Movies: { "Interstellar (2014).mkv": 14_000_000_000 },
     TV: { "Severance S02E01.mkv": 2_100_000_000 },
   },
-  music: { "Daft Punk - Discovery": { "01 One More Time.flac": 32_000_000 }, "podcast.mp3": 55_000_000 },
+  // Several screens of folders, for scrolling and Back/Up behaviour.
+  music: {
+    ...Object.fromEntries(
+      Array.from({ length: 48 }, (_, a) => [
+        `Album ${String(a + 1).padStart(2, "0")}`,
+        Object.fromEntries(Array.from({ length: 8 + (a % 7) }, (_, t) => [`${String(t + 1).padStart(2, "0")} Track ${t + 1}.flac`, 21_000_000 + t * 1_700_000])),
+      ]),
+    ),
+    "Daft Punk - Discovery": { "01 One More Time.flac": 32_000_000 },
+    "podcast.mp3": 55_000_000,
+  },
   backup: { "MacBook.sparsebundle": {}, "PC-Backup-2025-09.zip": 40_000_000_000 },
 };
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
 import {
   ArrowUp,
   ChevronDown,
@@ -57,6 +57,8 @@ interface Props {
   viewMode: ViewMode;
   showHidden: boolean;
   errorText: string | null;
+  /** Set by the app on every navigation; decides where the list scrolls to. */
+  navIntent: NavIntent;
   canBack: boolean;
   canForward: boolean;
   onViewMode: (mode: ViewMode) => void;
@@ -65,6 +67,8 @@ interface Props {
   onUp: () => void;
   onOpenShare: (name: string) => void;
   onOpenDir: (path: string) => void;
+  /** Path bar: back up to the share root ("") or an ancestor folder. */
+  onJump: (path: string) => void;
   onGoRoot: () => void;
   onRefresh: () => void;
   onRetry: () => void;
@@ -84,6 +88,47 @@ interface Props {
 }
 
 type SortKey = "name" | "modified" | "size";
+
+/**
+ * Where the list should land after a navigation. Back, Forward, Up and path
+ * bar jumps set `restore`: the folder comes back at the scroll position it
+ * had, with the folder you came out of selected. Opening a folder starts at
+ * the top. `seq` changes with every navigation; `from` is where it started.
+ */
+export interface NavIntent {
+  seq: number;
+  restore: boolean;
+  from: { share: string | null; path: string } | null;
+}
+
+/** How a folder's list looked when you last saw it. */
+interface ListMemo {
+  top: number;
+  /** View mode, sort and hidden-file setting `top` belongs to; empty while a filter was on. */
+  layout: string;
+  selection: ReadonlySet<string>;
+}
+
+const MEMO_LIMIT = 500;
+
+function remember(memo: Map<string, ListMemo>, key: string, value: ListMemo) {
+  memo.delete(key); // re-insert, so the cap drops the folders visited longest ago
+  memo.set(key, value);
+  if (memo.size > MEMO_LIMIT) {
+    const oldest = memo.keys().next().value;
+    if (oldest !== undefined) memo.delete(oldest);
+  }
+}
+
+/** The item of `share/path` that leads to `from`, when `from` lies inside it. */
+function childOnPath(from: { share: string | null; path: string }, share: string | null, path: string): string | null {
+  if (!from.share) return null;
+  if (!share) return from.share;
+  if (from.share !== share) return null;
+  const prefix = path ? `${path}/` : "";
+  if (from.path.length <= prefix.length || !from.path.startsWith(prefix)) return null;
+  return prefix + from.path.slice(prefix.length).split("/")[0];
+}
 
 /** One row/cell in the browser: a share at the root, or a file/folder inside one. */
 interface Item {
@@ -264,12 +309,17 @@ export function FileBrowser(p: Props) {
   const loadingStale = p.view === "loading" && p.entries.length > 0;
   const showPathbar = hasServer && p.view !== "welcome" && p.view !== "connect-error";
 
-  useEffect(() => {
+  // Another folder starts with a clean slate. This runs during render, so the
+  // first frame of the new folder never shows the old selection or filter.
+  const locKey = `${p.server?.id ?? ""}\n${p.share ?? ""}\n${p.path}`;
+  const [locSeen, setLocSeen] = useState(locKey);
+  if (locSeen !== locKey) {
+    setLocSeen(locKey);
     setSelection(new Set());
     setAnchor(null);
     setFilter("");
     setMenu(null);
-  }, [p.share, p.path, p.server?.id]);
+  }
 
   useEffect(() => {
     const onKey = (e: globalThis.KeyboardEvent) => {
@@ -359,6 +409,63 @@ export function FileBrowser(p: Props) {
   };
 
   visibleRef.current = visible;
+
+  // ── Scroll memory ─────────────────────────────────────────────────────
+  // Every folder remembers its scroll offset and selection for the session.
+  const memoRef = useRef(new Map<string, ListMemo>());
+  /** The folder whose listing is in the DOM (it stays there, dimmed, while the next one loads). */
+  const shownRef = useRef<string | null>(null);
+  const placedSeqRef = useRef(-1);
+  const layoutKey = filter ? "" : `${p.viewMode}|${sort.key}|${sort.asc}|${p.showHidden}`;
+
+  const snapshot = () => {
+    const el = contentRef.current;
+    if (el && browsing && shownRef.current === locKey) remember(memoRef.current, locKey, { top: el.scrollTop, layout: layoutKey, selection });
+  };
+
+  /** Scrolls item `index` fully into view, below the sticky column header. */
+  const reveal = (index: number, center = false) => {
+    const el = contentRef.current;
+    const node = el?.querySelector<HTMLElement>(`[data-index="${index}"]`);
+    if (!el || !node) return;
+    const header = el.querySelector("thead")?.getBoundingClientRect().height ?? 0;
+    const room = el.clientHeight - header;
+    const r = node.getBoundingClientRect();
+    const top = r.top - el.getBoundingClientRect().top - el.clientTop - header;
+    if (center) el.scrollTop += top - (room - r.height) / 2;
+    else if (top < 0) el.scrollTop += top;
+    else if (top + r.height > room) el.scrollTop += top + r.height - room;
+  };
+
+  // Place a freshly loaded listing before it paints: back where it was for
+  // Back/Forward/Up/path bar, at the top for a folder you just opened.
+  useLayoutEffect(() => {
+    const el = contentRef.current;
+    if (!browsing) {
+      if (!loadingStale) shownRef.current = null;
+      return;
+    }
+    if (!el || (placedSeqRef.current === p.navIntent.seq && shownRef.current === locKey)) return;
+    placedSeqRef.current = p.navIntent.seq;
+    shownRef.current = locKey;
+    const { restore, from } = p.navIntent;
+    const memo = restore ? memoRef.current.get(locKey) : undefined;
+    const child = restore && from ? childOnPath(from, p.share, p.path) : null;
+    const wanted = child !== null ? new Set([child]) : (memo?.selection ?? new Set<string>());
+    const picked = new Set(visible.filter((i) => wanted.has(i.key)).map((i) => i.key));
+    const index = picked.size > 0 ? visible.findIndex((i) => picked.has(i.key)) : -1;
+    const sameLayout = !!memo && memo.layout !== "" && memo.layout === layoutKey;
+    el.scrollTop = sameLayout ? memo.top : 0;
+    if (index >= 0) reveal(index, !sameLayout);
+    if (picked.size > 0) {
+      setSelection(picked);
+      setAnchor(index);
+    }
+  });
+
+  // Keep the memo current: on scroll (see .content) and whenever the
+  // selection or the layout changes.
+  useLayoutEffect(() => snapshot(), [selection, browsing, locKey, layoutKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Clicking empty space clears the selection (rows stop propagation). A
   // click that ended a rubber-band drag must not.
@@ -534,7 +641,7 @@ export function FileBrowser(p: Props) {
       const next = Math.max(0, Math.min(visible.length - 1, current + delta));
       setAnchor(next);
       setSelection(new Set([visible[next].key]));
-      contentRef.current?.querySelector<HTMLElement>(`[data-index="${next}"]`)?.scrollIntoView({ block: "nearest" });
+      reveal(next);
     }
   };
 
@@ -543,8 +650,8 @@ export function FileBrowser(p: Props) {
   const pathSegments: { label: string; icon: ReactNode; go: () => void }[] = p.server
     ? [
         { label: p.server.name, icon: <HardDrive size={12} />, go: p.onGoRoot },
-        ...(p.share ? [{ label: p.share, icon: <Folder size={12} />, go: () => p.onOpenDir("") }] : []),
-        ...segments.map((seg, i) => ({ label: seg, icon: <Folder size={12} />, go: () => p.onOpenDir(segments.slice(0, i + 1).join("/")) })),
+        ...(p.share ? [{ label: p.share, icon: <Folder size={12} />, go: () => p.onJump("") }] : []),
+        ...segments.map((seg, i) => ({ label: seg, icon: <Folder size={12} />, go: () => p.onJump(segments.slice(0, i + 1).join("/")) })),
       ]
     : [];
   const SortIcon = ({ k }: { k: SortKey }) => (sort.key === k ? sort.asc ? <ChevronUp size={12} /> : <ChevronDown size={12} /> : null);
@@ -820,6 +927,7 @@ export function FileBrowser(p: Props) {
         tabIndex={0}
         onKeyDown={onKeyDown}
         ref={contentRef}
+        onScroll={snapshot}
         onClick={onContentClick}
         onMouseDown={onContentMouseDown}
         onMouseMove={onContentMouseMove}

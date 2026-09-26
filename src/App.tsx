@@ -5,7 +5,7 @@ import { api, errorOf, isTauri, logToBackend } from "./api";
 import { useI18n } from "./i18n";
 import { parentPath } from "./format";
 import { Sidebar, type ServerStatus } from "./components/Sidebar";
-import { FileBrowser, type BrowserView, type ViewMode } from "./components/FileBrowser";
+import { FileBrowser, type BrowserView, type NavIntent, type ViewMode } from "./components/FileBrowser";
 import { TransfersButton, TransfersPopover, useAutoOpen } from "./components/Transfers";
 import { AddServerDialog } from "./components/AddServerDialog";
 import { SettingsDialog, type UpdateState } from "./components/SettingsDialog";
@@ -54,6 +54,7 @@ export default function App() {
   const [sharesError, setSharesError] = useState<string | null>(null);
   const [nav, setNav] = useState<Nav>({ share: null, path: "" });
   const [history, setHistory] = useState<{ back: Nav[]; forward: Nav[] }>({ back: [], forward: [] });
+  const [navIntent, setNavIntent] = useState<NavIntent>({ seq: 0, restore: false, from: null });
   const [entries, setEntries] = useState<Entry[]>([]);
   const [view, setView] = useState<BrowserView>("welcome");
   const [viewMode, setViewModeState] = useState<ViewMode>(readViewMode);
@@ -141,14 +142,19 @@ export default function App() {
     [describe],
   );
 
+  /**
+   * `restore` (Back, Forward, Up, path bar) brings the folder back at the
+   * scroll position it had; otherwise it opens at the top.
+   */
   const go = useCallback(
-    (target: Nav, push = true) => {
+    (target: Nav, opts: { push?: boolean; restore?: boolean } = {}) => {
       const serverId = selectedRef.current;
       if (!serverId) return;
       const current = navRef.current;
-      if (push && (current.share !== target.share || current.path !== target.path)) {
+      if ((opts.push ?? true) && (current.share !== target.share || current.path !== target.path)) {
         setHistory((h) => ({ back: [...h.back, current], forward: [] }));
       }
+      setNavIntent((n) => ({ seq: n.seq + 1, restore: opts.restore ?? false, from: current }));
       setNav(target);
       navRef.current = target;
       setPreview(null);
@@ -177,6 +183,7 @@ export default function App() {
       setNav({ share: null, path: "" });
       navRef.current = { share: null, path: "" };
       setHistory({ back: [], forward: [] });
+      setNavIntent((n) => ({ seq: n.seq + 1, restore: false, from: null }));
       setEntries([]);
       setShares([]);
       setSharesError(null);
@@ -190,7 +197,7 @@ export default function App() {
         setShares(info.shares);
         setSharesError(info.sharesError);
         setStatuses((s) => ({ ...s, [server.id]: "connected" }));
-        if (openLastShare && server.lastShare) go({ share: server.lastShare, path: "" }, false);
+        if (openLastShare && server.lastShare) go({ share: server.lastShare, path: "" }, { push: false });
         else setView("shares");
       } catch (e) {
         if (req !== requestSeq.current) return;
@@ -361,19 +368,19 @@ export default function App() {
     if (!prev) return;
     const current = navRef.current;
     setHistory({ back: history.back.slice(0, -1), forward: [current, ...history.forward] });
-    go(prev, false);
+    go(prev, { push: false, restore: true });
   };
   const forward = () => {
     const next = history.forward[0];
     if (!next) return;
     const current = navRef.current;
     setHistory({ back: [...history.back, current], forward: history.forward.slice(1) });
-    go(next, false);
+    go(next, { push: false, restore: true });
   };
   const up = () => {
     if (!nav.share) return;
-    if (nav.path) go({ share: nav.share, path: parentPath(nav.path) });
-    else go({ share: null, path: "" });
+    if (nav.path) go({ share: nav.share, path: parentPath(nav.path) }, { restore: true });
+    else go({ share: null, path: "" }, { restore: true });
   };
   const refresh = () => {
     if (!selectedServer) return;
@@ -583,6 +590,7 @@ export default function App() {
           viewMode={viewMode}
           showHidden={showHidden}
           errorText={errorMsg}
+          navIntent={navIntent}
           canBack={history.back.length > 0}
           canForward={history.forward.length > 0}
           onViewMode={setViewMode}
@@ -591,7 +599,8 @@ export default function App() {
           onUp={up}
           onOpenShare={(name) => go({ share: name, path: "" })}
           onOpenDir={(path) => nav.share && go({ share: nav.share, path })}
-          onGoRoot={() => go({ share: null, path: "" })}
+          onJump={(path) => nav.share && go({ share: nav.share, path }, { restore: true })}
+          onGoRoot={() => go({ share: null, path: "" }, { restore: true })}
           onRefresh={refresh}
           onRetry={retry}
           onEditServer={() => selectedServer && setDialog({ kind: "edit", server: selectedServer })}
