@@ -53,8 +53,31 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: "Neat NAS ${{ github.ref_name }}"
-          releaseBody: "Download the installer for your platform below. macOS: open the .dmg and drag Neat NAS to Applications. Windows: run the .exe installer."
+          releaseBody: "Download the installer for your platform below. macOS: open the .dmg and drag Neat NAS to Applications. Windows: run the .exe installer. The .zip files hold the same app without an installer."
           releaseDraft: true
           prerelease: false
           includeUpdaterJson: true
           args: ${{ matrix.args }}
+      # The same app without an installer, attached next to the .dmg and .exe.
+      - name: Attach the zipped app (macOS)
+        if: matrix.os == 'macos-latest'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version=$(node -p "require('./package.json').version")
+          zip="Neat NAS_${version}_universal-mac.zip"
+          ditto -c -k --sequesterRsrc --keepParent "src-tauri/target/universal-apple-darwin/release/bundle/macos/Neat NAS.app" "$zip"
+          gh release upload "$GITHUB_REF_NAME" "$zip" --clobber --repo "$GITHUB_REPOSITORY"
+      - name: Attach the zipped app (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $version = node -p "require('./package.json').version"
+          $zip = "Neat NAS_${version}_x64-win.zip"
+          # Take the exe from the installer: that copy carries the NSIS marker the updater reads.
+          7z e "src-tauri/target/release/bundle/nsis/Neat NAS_${version}_x64-setup.exe" neatnas.exe -oportable -y | Out-Null
+          Rename-Item "portable/neatnas.exe" "Neat NAS.exe"
+          Compress-Archive -LiteralPath "portable/Neat NAS.exe" -DestinationPath $zip -Force
+          gh release upload $env:GITHUB_REF_NAME $zip --clobber --repo $env:GITHUB_REPOSITORY

@@ -1,15 +1,17 @@
 #!/bin/bash
 # Cross-build the Windows x64 release (NSIS installer) from macOS.
 #
-# Needs: rustup target x86_64-pc-windows-msvc, cargo-xwin, Homebrew llvm and
-# makensis (brew install llvm makensis; cargo install cargo-xwin). The first
+# Needs: rustup target x86_64-pc-windows-msvc, cargo-xwin, Homebrew llvm,
+# makensis and sevenzip (brew install llvm makensis sevenzip; cargo install
+# cargo-xwin). The first
 # run downloads the Windows SDK/CRT (~1 GB) into cargo-xwin's cache.
 #
 # Homebrew's makensis 3.12 aborts with std::bad_alloc on recent macOS unless
 # a debugger is attached, so when the plain binary fails a self-test the
 # script runs it under lldb through a shim placed first on PATH.
 #
-# Artifacts are copied to release/<version>/. The updater signature is
+# The installer, the zipped exe, SHA256SUMS.txt and the updater signature are
+# collected in release/<version>/ (see collect-release.sh). The signature is
 # produced when ~/.tauri/neatnas.key exists (or TAURI_SIGNING_PRIVATE_KEY
 # is already set).
 set -euo pipefail
@@ -47,9 +49,4 @@ fi
 
 npm run tauri build -- --runner cargo-xwin --target x86_64-pc-windows-msvc --bundles nsis "$@"
 
-version=$(node -p "require('./package.json').version")
-out="release/$version"
-mkdir -p "$out"
-cp src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*-setup.exe* "$out/"
-echo "Windows artifacts:"
-ls -la "$out"
+scripts/collect-release.sh windows

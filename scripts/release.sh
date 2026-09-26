@@ -1,7 +1,8 @@
 #!/bin/bash
 # One-shot release. Bumps the version everywhere, commits, tags, pushes, waits
-# for the Release workflow to build macOS + Windows on GitHub, publishes the
-# draft it creates, and verifies that the updater manifest is live.
+# for the Release workflow to build macOS + Windows on GitHub, copies the draft
+# into release/<version>/ and attaches SHA256SUMS.txt, publishes the draft,
+# and verifies that the updater manifest is live.
 #
 #   scripts/release.sh 1.0.1            # notes from docs/marketing/release-notes-v1.0.1.md if present
 #   scripts/release.sh 1.0.1 notes.md   # explicit release notes
@@ -50,6 +51,10 @@ for _ in $(seq 1 180); do
 done
 conclusion=$(gh run view "$run_id" --repo "$repo" --json conclusion --jq .conclusion)
 [ "$conclusion" = "success" ] || { echo "workflow finished with: $conclusion"; gh run view "$run_id" --repo "$repo" --log-failed | tail -40; exit 1; }
+
+echo "== copying the release into release/$version and attaching SHA256SUMS.txt"
+scripts/collect-release.sh github "$tag"
+gh release upload "$tag" "release/$version/SHA256SUMS.txt" --repo "$repo" --clobber
 
 echo "== publishing the draft release"
 [ -f "$notes" ] && gh release edit "$tag" --repo "$repo" --notes-file "$notes" >/dev/null

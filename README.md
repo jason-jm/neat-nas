@@ -53,7 +53,9 @@ Neat NAS is a small desktop app that does one thing well: it opens on your NAS. 
 
 **Windows 10/11**: run the `-setup.exe`. It installs for the current user, no admin rights needed. Until the installer is code-signed, SmartScreen shows "Windows protected your PC" → More info → Run anyway.
 
-Both installers are on the [releases page](https://github.com/jason-jm/neat-nas/releases/latest).
+**No installer?** Every release also has a `-mac.zip` and a `-win.zip` with the same app: unzip and run it (on a Mac, move it to Applications first). The Windows zip relies on the WebView2 runtime that Windows 11 and up-to-date Windows 10 include; the installer adds it when it is missing. `SHA256SUMS.txt` lists the checksums of all four files.
+
+Everything is on the [releases page](https://github.com/jason-jm/neat-nas/releases/latest).
 
 ## How it works
 

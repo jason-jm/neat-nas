@@ -18,9 +18,11 @@
 | Platform | File | Notes |
 | --- | --- | --- |
 | macOS 11+ (Apple Silicon and Intel) | `Neat NAS_1.0.0_universal.dmg` | Not yet notarized: right-click → Open on first launch. |
+| macOS 11+ (Apple Silicon and Intel) | `Neat NAS_1.0.0_universal-mac.zip` | The same app without the disk image: unzip, move to Applications. |
 | Windows 10/11 (x64) | `Neat NAS_1.0.0_x64-setup.exe` | Not yet code-signed: SmartScreen → More info → Run anyway. Installs per user. |
+| Windows 10/11 (x64) | `Neat NAS_1.0.0_x64-win.zip` | The same app without an installer: unzip and run `Neat NAS.exe`. Needs WebView2, which Windows 11 and current Windows 10 include. |
 
-`latest.json` and the `.sig` files are what the in-app updater uses; you can ignore them.
+`SHA256SUMS.txt` lists the checksums of these four files. `latest.json` and the `.sig` files are what the in-app updater uses; you can ignore them.
 
 ### Known limitations
 

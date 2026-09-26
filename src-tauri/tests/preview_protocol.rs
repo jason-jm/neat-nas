@@ -2,8 +2,9 @@
 //! local Samba server. Skipped unless NEATNAS_TEST_SMB_* are set.
 //!
 //! Not built on Windows: a test binary that links Tauri's runtime dies at
-//! start-up with STATUS_ENTRYPOINT_NOT_FOUND (0xc0000139) because the
-//! WebView2 loader is only staged next to the real app, and the test would
+//! start-up with STATUS_ENTRYPOINT_NOT_FOUND (0xc0000139). tauri-build embeds
+//! the Common Controls v6 manifest only into the app binary, so a test binary
+//! cannot resolve the comctl32 v6 imports Tauri needs. The test would
 //! self-skip on CI anyway for lack of an SMB server.
 #![cfg(not(windows))]
 

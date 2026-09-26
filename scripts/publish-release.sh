@@ -1,31 +1,37 @@
 #!/bin/bash
-# Publish a GitHub release from locally built bundles.
+# Publish a GitHub release from locally built bundles (the fallback when the
+# Release workflow is not used).
 #
+#   scripts/build-mac.sh && scripts/build-windows.sh
 #   scripts/publish-release.sh v1.0.0 [--draft]
 #
-# Expects the macOS universal build and the Windows build to exist (see
-# RELEASE.md). Uploads the .dmg, the updater .app.tar.gz + .sig, the Windows
-# -setup.exe + .sig, and a latest.json manifest that points at those assets,
-# which is what running copies of the app poll for updates.
+# Uploads release/<version>/: the .dmg, the macOS zip, the Windows installer,
+# the Windows zip, SHA256SUMS.txt and the updater files, plus a latest.json
+# (written to release/<version>/updater/) that points running copies of the
+# app at the new version.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 tag="${1:?usage: publish-release.sh vX.Y.Z [--draft]}"
 version="${tag#v}"
 repo="jason-jm/neat-nas"
-mac="src-tauri/target/universal-apple-darwin/release/bundle"
-win="src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis"
+dir="release/$version"
+[ "$(node -p "require('./package.json').version")" = "$version" ] || { echo "package.json is not at $version"; exit 1; }
 
-dmg=$(ls "$mac"/dmg/*.dmg)
-app_tgz=$(ls "$mac"/macos/*.app.tar.gz)
+dmg="$dir/Neat NAS_${version}_universal.dmg"
+mac_zip="$dir/Neat NAS_${version}_universal-mac.zip"
+exe="$dir/Neat NAS_${version}_x64-setup.exe"
+win_zip="$dir/Neat NAS_${version}_x64-win.zip"
+app_tgz="$dir/updater/Neat NAS.app.tar.gz"
 app_sig="$app_tgz.sig"
-exe=$(ls "$win"/*-setup.exe)
-exe_sig="$exe.sig"
-for f in "$dmg" "$app_tgz" "$app_sig" "$exe" "$exe_sig"; do [ -f "$f" ] || { echo "missing $f"; exit 1; }; done
+exe_sig="$dir/updater/Neat NAS_${version}_x64-setup.exe.sig"
+for f in "$dmg" "$mac_zip" "$exe" "$win_zip" "$app_tgz" "$app_sig" "$exe_sig"; do
+  [ -f "$f" ] || { echo "missing $f (run scripts/build-mac.sh and scripts/build-windows.sh)"; exit 1; }
+done
+scripts/collect-release.sh sums >/dev/null
 
 # GitHub replaces spaces in asset names with dots.
 asset_url() { echo "https://github.com/$repo/releases/download/$tag/$(basename "$1" | sed 's/ /./g')"; }
-out=$(mktemp -d); trap 'rm -rf "$out"' EXIT
-python3 - "$out/latest.json" "$version" "$(asset_url "$app_tgz")" "$(cat "$app_sig")" "$(asset_url "$exe")" "$(cat "$exe_sig")" <<'PY'
+python3 - "$dir/updater/latest.json" "$version" "$(asset_url "$app_tgz")" "$(cat "$app_sig")" "$(asset_url "$exe")" "$(cat "$exe_sig")" <<'PY'
 import json, sys, datetime
 path, version, mac_url, mac_sig, win_url, win_sig = sys.argv[1:]
 mac = {"signature": mac_sig, "url": mac_url}
@@ -47,5 +53,5 @@ notes="docs/marketing/release-notes-$tag.md"
 [ -f "$notes" ] || notes="RELEASE.md"
 draft=""; [ "${2:-}" = "--draft" ] && draft="--draft"
 gh release create "$tag" --repo "$repo" --title "Neat NAS $version" --notes-file "$notes" $draft \
-  "$dmg" "$app_tgz" "$app_sig" "$exe" "$exe_sig" "$out/latest.json"
+  "$dmg" "$mac_zip" "$exe" "$win_zip" "$dir/SHA256SUMS.txt" "$app_tgz" "$app_sig" "$exe_sig" "$dir/updater/latest.json"
 echo "published $tag"
