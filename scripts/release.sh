@@ -132,6 +132,28 @@ if problems:
     sys.exit(1)
 print("latest.json ok: " + ", ".join(sorted(plat)))
 PY
+
+echo "== checking the updater signatures with the public key built into the app"
+command -v minisign >/dev/null || { echo "minisign is needed for this check: brew install minisign"; exit 1; }
+python3 - "release/$version/updater/latest.json" "$dir" <<'PY'
+import base64, json, os, subprocess, sys, tempfile, urllib.parse
+path, root = sys.argv[1:]
+work = tempfile.mkdtemp()
+pub = os.path.join(work, "pub.key")
+open(pub, "w").write(base64.b64decode(json.load(open("src-tauri/tauri.conf.json"))["plugins"]["updater"]["pubkey"]).decode())
+bad = []
+for key, entry in sorted(json.load(open(path))["platforms"].items()):
+    name = urllib.parse.unquote(entry["url"].rsplit("/", 1)[-1]).replace("Neat.NAS", "Neat NAS", 1)
+    file = os.path.join(root, "updater" if name.endswith(".app.tar.gz") else "", name)
+    sig = os.path.join(work, key + ".minisig")
+    open(sig, "wb").write(base64.b64decode(entry["signature"]))
+    if subprocess.run(["minisign", "-V", "-q", "-p", pub, "-m", file, "-x", sig]).returncode != 0:
+        bad.append(key)
+if bad:
+    print("these updater signatures do not verify, so the draft stays unpublished: " + ", ".join(bad))
+    sys.exit(1)
+print("all updater signatures verify")
+PY
 gh release upload "$tag" "release/$version/SHA256SUMS.txt" --repo "$repo" --clobber
 
 echo "== publishing the draft release"

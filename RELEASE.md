@@ -53,9 +53,18 @@ On a Mac without the identity the build falls back to ad-hoc signing (`signingId
 
 To save the notarization credentials on another Mac: `xcrun notarytool store-credentials WAVESUBS_NOTARY --apple-id <Apple ID> --team-id <team ID>` (it asks for an app-specific password from appleid.apple.com).
 
-### Windows signing (optional)
+### Windows signing (Authenticode)
 
-Unsigned installers trigger SmartScreen ("Windows protected your PC" → More info → Run anyway). To sign, follow the Tauri docs for `bundle.windows.certificateThumbprint` or an Azure Trusted Signing setup and add the corresponding secrets.
+Windows releases are not signed yet, so SmartScreen warns on first launch ("Windows protected your PC" → More info → Run anyway). The pipeline is ready for SignPath's free code signing program for open-source projects, the same plan as Wave Subs:
+
+1. Apply at https://signpath.org with this repository (MIT license, public GitHub Actions build); the code signing policy the program asks for is `docs/code-signing-policy.md`. Keep two-factor authentication on for GitHub.
+2. Once accepted, in SignPath: create the project, connect this repository as a trusted build system (install the SignPath GitHub App), paste `.signpath/artifact-configuration.xml` as the artifact configuration, and create a signing policy for releases.
+3. In this repository's settings: the secret `SIGNPATH_API_TOKEN`, and the variables `SIGNPATH_ORGANIZATION_ID`, `SIGNPATH_PROJECT_SLUG` and `SIGNPATH_POLICY_SLUG`.
+4. Change the status line in `docs/code-signing-policy.md` to say releases are signed.
+
+From then on the Release workflow's `sign` job signs the installer and the zipped `Neat NAS.exe`, signs the new installer again for the updater and fixes `latest.json`, and `scripts/release.sh` checks every updater signature before publishing. The exe inside the installer stays unsigned: SmartScreen only checks downloaded files, which are the installer and the zip's exe.
+
+The alternative is a paid Authenticode certificate, which shows your own name as the publisher; since 2023 its key has to live in a hardware token or a cloud signing service, which Tauri can call through `bundle.windows.signCommand`. Any new certificate still has to build SmartScreen reputation over time.
 
 ## Building locally
 

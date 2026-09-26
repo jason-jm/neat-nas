@@ -1,9 +1,10 @@
 name: Release
 
 # Pushed tags (scripts/release.sh pushes them) build the Windows installer and
-# zip here and attach them to a draft release. The macOS app is built, signed
-# with the Developer ID and notarized on the maintainer's Mac by the same
-# script, so the signing key never leaves that Mac; see RELEASE.md.
+# zip here and attach them to a draft release; once SignPath is set up, the
+# sign job replaces them with Authenticode-signed files. The macOS app is
+# built, signed with the Developer ID and notarized on the maintainer's Mac by
+# the same script, so that key never leaves the Mac; see RELEASE.md.
 on:
   push:
     tags: ["v*"]
@@ -15,6 +16,8 @@ jobs:
   windows:
     name: Build (Windows x64)
     runs-on: windows-latest
+    outputs:
+      unsigned-artifact-id: ${{ steps.unsigned.outputs.artifact-id }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -58,3 +61,72 @@ jobs:
           Rename-Item "portable/neatnas.exe" "Neat NAS.exe"
           Compress-Archive -LiteralPath "portable/Neat NAS.exe" -DestinationPath $zip -Force
           gh release upload $env:GITHUB_REF_NAME $zip --clobber --repo $env:GITHUB_REPOSITORY
+      # Authenticode signing (the sign job below) works on a GitHub artifact.
+      - name: Stage the files to sign
+        if: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
+        shell: pwsh
+        run: |
+          $version = node -p "require('./package.json').version"
+          New-Item -ItemType Directory -Force -Path to-sign | Out-Null
+          Copy-Item -LiteralPath "src-tauri/target/release/bundle/nsis/Neat NAS_${version}_x64-setup.exe" -Destination to-sign/
+          Copy-Item -LiteralPath "portable/Neat NAS.exe" -Destination to-sign/
+      - name: Upload the files to sign
+        id: unsigned
+        if: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-unsigned
+          path: to-sign/
+          if-no-files-found: error
+
+  # Authenticode signing through SignPath's free program for open-source
+  # projects. Skipped until the SignPath project exists; then set the secret
+  # SIGNPATH_API_TOKEN and the variables SIGNPATH_ORGANIZATION_ID,
+  # SIGNPATH_PROJECT_SLUG and SIGNPATH_POLICY_SLUG (see RELEASE.md).
+  sign:
+    name: Sign (Windows)
+    needs: windows
+    if: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - uses: signpath/github-action-submit-signing-request@v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_POLICY_SLUG }}
+          github-artifact-id: ${{ needs.windows.outputs.unsigned-artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: signed
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # The signed installer is a different file, so its updater signature and
+      # latest.json must follow; the zip gets the signed exe. Files are named
+      # the way GitHub stores them (dots for spaces) so --clobber replaces them.
+      - name: Replace the draft's Windows files with the signed ones
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          setup="Neat.NAS_${version}_x64-setup.exe"
+          cp "signed/Neat NAS_${version}_x64-setup.exe" "$setup"
+          npx --yes @tauri-apps/cli@2 signer sign "$setup"
+          (cd signed && zip -X -q "../Neat.NAS_${version}_x64-win.zip" "Neat NAS.exe")
+          gh release download "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --pattern latest.json --clobber
+          python3 - "$setup.sig" <<'PY'
+          import json, sys
+          signature = open(sys.argv[1]).read().strip()
+          manifest = json.load(open("latest.json"))
+          for key in ("windows-x86_64", "windows-x86_64-nsis"):
+              if key in manifest.get("platforms", {}):
+                  manifest["platforms"][key]["signature"] = signature
+          open("latest.json", "w").write(json.dumps(manifest, indent=2) + "\n")
+          PY
+          gh release upload "$GITHUB_REF_NAME" "$setup" "$setup.sig" "Neat.NAS_${version}_x64-win.zip" latest.json --clobber --repo "$GITHUB_REPOSITORY"

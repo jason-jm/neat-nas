@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SignPath artifact configuration for the Release workflow's "windows-unsigned"
+     artifact: the NSIS installer and the portable Neat NAS.exe, both signed with
+     Authenticode. Paste it into the SignPath project (see RELEASE.md). -->
+<artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
+  <zip-file>
+    <pe-file path="Neat NAS_*_x64-setup.exe" max-matches="1">
+      <authenticode-sign />
+    </pe-file>
+    <pe-file path="Neat NAS.exe" max-matches="1">
+      <authenticode-sign />
+    </pe-file>
+  </zip-file>
+</artifact-configuration>

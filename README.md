@@ -70,3 +70,5 @@ Bug reports, translations and pull requests are welcome. Start with [docs/DEVELO
 ## License
 
 [MIT](LICENSE). Made for people who would rather browse their NAS than remember it.
+
+How releases are built and signed, and what the app sends over the network: [code signing policy](docs/code-signing-policy.md).
