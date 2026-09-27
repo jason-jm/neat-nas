@@ -16,6 +16,7 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
 Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing
 Add-Type -TypeDefinition @"
 using System;
 using System.Runtime.InteropServices;
@@ -91,6 +92,16 @@ function Wait-Until([scriptblock]$Condition, [int]$Seconds, [string]$What) {
 
 function Log-Text { if (Test-Path $appLog) { Get-Content $appLog -Raw -ErrorAction SilentlyContinue } else { "" } }
 
+# A PNG of a screen area, for looking at the real Windows rendering later.
+function Snap([string]$name, [int]$x, [int]$y, [int]$w, [int]$h) {
+  $bmp = New-Object System.Drawing.Bitmap $w, $h
+  $g = [System.Drawing.Graphics]::FromImage($bmp)
+  $g.CopyFromScreen($x, $y, 0, 0, $bmp.Size)
+  $g.Dispose()
+  $bmp.Save((Join-Path $Logs "$name.png"), [System.Drawing.Imaging.ImageFormat]::Png)
+  $bmp.Dispose()
+}
+
 function Same-File($a, $b) {
   (Test-Path $a) -and (Test-Path $b) -and ((Get-FileHash $a).Hash -eq (Get-FileHash $b).Hash)
 }
@@ -142,6 +153,16 @@ try {
   $proc.Refresh()
   $hwnd = $proc.MainWindowHandle
   if ($hwnd -eq [IntPtr]::Zero) { throw "no main window" }
+  # The toolbar at the default size and at the narrowest, close button hovered.
+  foreach ($width in @(1120, 920)) {
+    [void][Desk]::SetWindowPos($hwnd, [IntPtr]::Zero, 0, 0, $width, 640, 0x0040)
+    [void][Desk]::SetForegroundWindow($hwnd)
+    Start-Sleep -Milliseconds 700
+    $o = [Desk]::ClientOrigin($hwnd)
+    [Desk]::Move($o.X + $width - 23, $o.Y + 26); Start-Sleep -Milliseconds 500
+    Snap "toolbar-$width" $o.X $o.Y ([Math]::Min($width, $screenW - $o.X)) 120
+  }
+  [Desk]::Move(300, 700)
   # Top-left, at the minimum width; the rest of the screen is for Explorer.
   [void][Desk]::SetWindowPos($hwnd, [IntPtr]::Zero, 0, 0, 920, 640, 0x0040)
   [void][Desk]::SetForegroundWindow($hwnd)
@@ -169,8 +190,15 @@ try {
   Start-Process explorer.exe $out
   $shell = New-Object -ComObject Shell.Application
   $explorer = $null
-  [void](Wait-Until { $script:explorer = @($shell.Windows() | Where-Object { $_.LocationURL -like "*e2e-out*" })[0]; $null -ne $script:explorer } 30 "the Explorer window")
-  if (-not $explorer) { throw "Explorer did not open $out" }
+  [void](Wait-Until {
+    $found = @($shell.Windows() | Where-Object { $_.LocationURL -like "*e2e-out*" })
+    if ($found.Count -gt 0) { $script:explorer = $found[0] }
+    $null -ne $script:explorer
+  } 30 "the Explorer window")
+  if (-not $explorer) {
+    Write-Host ("shell windows: " + ((@($shell.Windows()) | ForEach-Object { $_.LocationURL }) -join ", "))
+    throw "Explorer did not open $out"
+  }
   $ex = [IntPtr][long]$explorer.HWND
   $exW = 440; $exH = [Math]::Min(380, $screenH - 360)
   $exX = $screenW - $exW - 10; $exY = 300
