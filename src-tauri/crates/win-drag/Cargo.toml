@@ -1,0 +1,27 @@
+[package]
+name = "win-drag"
+version = "0.1.0"
+description = "Drag virtual files out of a window into Explorer (Windows only)"
+license = "MIT"
+edition = "2021"
+publish = false
+
+# Everything is Windows-only; on other targets the crate is empty.
+[target.'cfg(windows)'.dependencies]
+windows-core = "0.61"
+windows = { version = "0.61", features = [
+  "Win32_Foundation",
+  "Win32_Graphics_Gdi",
+  "Win32_Storage_FileSystem",
+  "Win32_System_Com",
+  "Win32_System_Com_Marshal",
+  "Win32_System_Com_StructuredStorage",
+  "Win32_System_DataExchange",
+  "Win32_System_Memory",
+  "Win32_System_Ole",
+  "Win32_System_SystemServices",
+  "Win32_UI_Controls",
+  "Win32_UI_Shell",
+  "Win32_UI_Shell_Common",
+  "Win32_UI_WindowsAndMessaging",
+] }

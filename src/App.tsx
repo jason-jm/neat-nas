@@ -79,6 +79,7 @@ export default function App() {
   const selectedRef = useRef(selectedId);
   selectedRef.current = selectedId;
   const refreshTimer = useRef<number | null>(null);
+  const dropValid = useRef(false);
 
   const selectedServer = useMemo(() => servers.find((s) => s.id === selectedId) ?? null, [servers, selectedId]);
 
@@ -326,10 +327,23 @@ export default function App() {
     let disposed = false;
     api
       .onFileDrop((e) => {
-        if (e.type === "enter" || e.type === "over") setDropActive(true);
-        else if (e.type === "leave") setDropActive(false);
-        else if (e.type === "drop") {
+        // Only drags that carry files count: not text, links or our own
+        // drag to Explorer passing over the window.
+        if (e.type === "enter") {
+          dropValid.current = e.paths.length > 0;
+          if (dropValid.current) {
+            setDropActive(true);
+            logToBackend(`file drop: enter with ${e.paths.length} item(s)`);
+          }
+        } else if (e.type === "over") {
+          if (dropValid.current) setDropActive(true);
+        } else if (e.type === "leave") {
+          dropValid.current = false;
           setDropActive(false);
+        } else if (e.type === "drop") {
+          dropValid.current = false;
+          setDropActive(false);
+          logToBackend(`file drop: ${e.paths.length} item(s)`);
           const serverId = selectedRef.current;
           const current = navRef.current;
           if (!serverId || !current.share || e.paths.length === 0) return;
@@ -350,6 +364,21 @@ export default function App() {
       unlisten?.();
     };
   }, [notify, describe, t]);
+
+  useEffect(() => {
+    let unlisten: Unsubscribe | undefined;
+    let disposed = false;
+    api
+      .onDragSkipped((n) => notify(t("toast.dragSkipped", { n }), "error"))
+      .then((u) => {
+        if (disposed) u();
+        else unlisten = u;
+      });
+    return () => {
+      disposed = true;
+      unlisten?.();
+    };
+  }, [notify, t]);
 
   const selectServer = useCallback(
     (id: string) => {

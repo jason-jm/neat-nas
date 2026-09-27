@@ -474,10 +474,16 @@ pub async fn start_drag_out(
         let app = window.app_handle().clone();
         crate::drag::start(window, app, params, server_id, share, items)
     }
-    #[cfg(not(target_os = "macos"))]
+    #[cfg(windows)]
+    {
+        let _ = server_id;
+        let app = window.app_handle().clone();
+        crate::drag_win::start(window, app, params, share, items)
+    }
+    #[cfg(not(any(target_os = "macos", windows)))]
     {
         let _ = (window, params, server_id, share, items);
-        Err(AppError::new("unsupported", "drag out is only implemented on macOS"))
+        Err(AppError::new("unsupported", "drag out is only implemented on macOS and Windows"))
     }
 }
 

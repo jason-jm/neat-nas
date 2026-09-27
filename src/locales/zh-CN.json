@@ -167,5 +167,6 @@
   "settings.doubleClick": "双击文件时",
   "settings.doubleClickHint": "快速预览对任何文件都可用，无法渲染的类型会显示提示和下载按钮。按空格键始终是快速预览。",
   "settings.action.preview": "快速预览",
-  "settings.action.download": "下载"
+  "settings.action.download": "下载",
+  "toast.dragSkipped": "有 {n} 项路径过长，无法拖到资源管理器，已跳过。请用“下载”获取。"
 }

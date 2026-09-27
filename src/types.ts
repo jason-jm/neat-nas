@@ -139,6 +139,8 @@ export interface Backend {
   previewUrl(serverId: string, share: string, path: string): string;
   pickFiles(directory: boolean): Promise<string[] | null>;
   onFileDrop(cb: (e: FileDropEvent) => void): Promise<Unsubscribe>;
+  /** Items left out of a drag to Explorer because their paths are too long (Windows). */
+  onDragSkipped(cb: (count: number) => void): Promise<Unsubscribe>;
   discoverServers(timeoutMs?: number): Promise<DiscoveredServer[]>;
   getSettings(): Promise<Settings>;
   setDownloadDir(path: string | null): Promise<void>;

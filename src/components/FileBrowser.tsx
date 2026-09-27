@@ -293,6 +293,7 @@ export function FileBrowser(p: Props) {
   const [manualShare, setManualShare] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const toolbarRef = useRef<HTMLDivElement>(null);
   // Rubber-band selection state. Coordinates are content-relative and
   // include the scroll offset, so the box stays put while auto-scrolling.
   const marqueeRef = useRef<{ startX: number; startY: number; additive: boolean; base: Set<string>; active: boolean } | null>(null);
@@ -320,6 +321,29 @@ export function FileBrowser(p: Props) {
     setFilter("");
     setMenu(null);
   }
+
+  // When the toolbar runs out of room it gives up space step by step: button
+  // labels first, then a narrower location and search, then the location
+  // title (the path bar still shows it). Measured rather than tied to a
+  // window width, so it holds for every language and for the window
+  // controls on Windows, and the buttons at the end are never cut off.
+  useLayoutEffect(() => {
+    const bar = toolbarRef.current;
+    if (!bar) return;
+    const fit = () => {
+      const last = bar.lastElementChild;
+      if (!last) return;
+      for (const step of ["", "1", "1 2", "1 2 3"]) {
+        bar.dataset.compact = step;
+        const end = bar.getBoundingClientRect().right - parseFloat(getComputedStyle(bar).paddingRight);
+        if (last.getBoundingClientRect().right <= end + 0.5) break;
+      }
+    };
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(bar);
+    return () => observer.disconnect();
+  }, [locale]);
 
   useEffect(() => {
     const onKey = (e: globalThis.KeyboardEvent) => {
@@ -833,7 +857,7 @@ export function FileBrowser(p: Props) {
 
   return (
     <div className="browser">
-      <div className={`toolbar${p.toolbarEnd ? " with-window-controls" : ""}`} data-tauri-drag-region>
+      <div className={`toolbar${p.toolbarEnd ? " with-window-controls" : ""}`} ref={toolbarRef} data-tauri-drag-region>
         <Button variant="ghost" iconOnly onClick={p.onBack} disabled={!p.canBack} title={t("browser.back")}>
           <ChevronLeft size={17} />
         </Button>
@@ -875,6 +899,7 @@ export function FileBrowser(p: Props) {
         <span className="toolbar-sep" />
         <Button
           variant="ghost"
+          className="with-label"
           disabled={!canDownload}
           title={canDownload ? t("browser.download") : t("browser.downloadHint")}
           onClick={() => p.onDownload(selectedEntries.map(toItem), false)}
@@ -884,6 +909,7 @@ export function FileBrowser(p: Props) {
         </Button>
         <Button
           variant="ghost"
+          className="with-label"
           disabled={!canDownload}
           title={canDownload ? t("browser.downloadTo") : t("browser.downloadHint")}
           onClick={() => p.onDownload(selectedEntries.map(toItem), true)}
@@ -893,7 +919,7 @@ export function FileBrowser(p: Props) {
         </Button>
         <Button
           variant="ghost"
-          className="upload-btn"
+          className="with-label upload-btn"
           disabled={!p.share || p.view !== "files"}
           title={p.share ? t("browser.upload") : t("browser.uploadHint")}
           onClick={(e) => {

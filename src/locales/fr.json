@@ -167,5 +167,6 @@
   "settings.doubleClick": "Double-clic sur un fichier",
   "settings.doubleClickHint": "Coup d’œil ouvre n’importe quel fichier ; les types qu’il ne peut pas afficher montrent un message avec un bouton de téléchargement. La barre d’espace ouvre toujours Coup d’œil.",
   "settings.action.preview": "Coup d’œil",
-  "settings.action.download": "Télécharger"
+  "settings.action.download": "Télécharger",
+  "toast.dragSkipped": "{n} élément(s) ignoré(s) : leur chemin est trop long pour être glissé dans l’Explorateur. Utilisez « Télécharger »."
 }

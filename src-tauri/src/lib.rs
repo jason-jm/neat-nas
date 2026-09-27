@@ -4,6 +4,8 @@ pub mod creds;
 pub mod discovery;
 #[cfg(target_os = "macos")]
 pub mod drag;
+#[cfg(windows)]
+pub mod drag_win;
 pub mod error;
 pub mod preview;
 pub mod smb;

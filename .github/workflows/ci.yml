@@ -30,3 +30,6 @@ jobs:
         run: cargo check --manifest-path src-tauri/Cargo.toml --tests --examples
       - name: Run tests (SMB tests self-skip without a server)
         run: cargo test --manifest-path src-tauri/Cargo.toml --tests
+      - name: Drag to Explorer (virtual files through the real shell)
+        if: runner.os == 'Windows'
+        run: cargo test --manifest-path src-tauri/Cargo.toml -p win-drag -- --nocapture

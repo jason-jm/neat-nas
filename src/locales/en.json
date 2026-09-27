@@ -167,5 +167,6 @@
   "settings.doubleClick": "Double-click a file",
   "settings.doubleClickHint": "Quick Look shows any file; types it cannot render show a notice with a download button. Space always opens Quick Look.",
   "settings.action.preview": "Quick Look",
-  "settings.action.download": "Download"
+  "settings.action.download": "Download",
+  "toast.dragSkipped": "{n} item(s) were left out because their paths are too long to drag into Explorer. Use Download for them."
 }

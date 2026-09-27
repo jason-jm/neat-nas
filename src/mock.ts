@@ -342,7 +342,8 @@ export const mock: Backend = {
   },
   async onFileDrop(cb: (e: FileDropEvent) => void) {
     // In a browser, HTML5 drag events stand in for the OS drop events.
-    const enter = (e: DragEvent) => { e.preventDefault(); cb({ type: "enter", paths: [] }); };
+    // Browsers hide the paths until the drop; report a placeholder when files are dragged.
+    const enter = (e: DragEvent) => { e.preventDefault(); cb({ type: "enter", paths: e.dataTransfer?.types.includes("Files") ? ["(files)"] : [] }); };
     const over = (e: DragEvent) => { e.preventDefault(); cb({ type: "over" }); };
     const leave = () => cb({ type: "leave" });
     const drop = (e: DragEvent) => { e.preventDefault(); cb({ type: "drop", paths: [...(e.dataTransfer?.files ?? [])].map((f) => `/Users/you/Desktop/${f.name}`) }); };
@@ -377,6 +378,9 @@ export const mock: Backend = {
   async setDownloadDir(path) {
     if (path) localStorage.setItem(DIR_KEY, path);
     else localStorage.removeItem(DIR_KEY);
+  },
+  async onDragSkipped() {
+    return () => undefined;
   },
   async onTransferProgress(cb) {
     subscribers.add(cb);
