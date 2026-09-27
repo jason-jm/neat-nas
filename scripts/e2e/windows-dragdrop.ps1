@@ -102,8 +102,10 @@ function Snap([string]$name, [int]$x, [int]$y, [int]$w, [int]$h) {
   $bmp.Dispose()
 }
 
+# False while a copy is still being written (Explorer holds it open).
 function Same-File($a, $b) {
-  (Test-Path $a) -and (Test-Path $b) -and ((Get-FileHash $a).Hash -eq (Get-FileHash $b).Hash)
+  try { (Test-Path $a) -and (Test-Path $b) -and ((Get-FileHash $a -ErrorAction Stop).Hash -eq (Get-FileHash $b -ErrorAction Stop).Hash) }
+  catch { $false }
 }
 
 # ── Desktop ──────────────────────────────────────────────────────────────

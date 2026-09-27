@@ -48,6 +48,7 @@ jobs:
         with:
           workspaces: src-tauri
           key: e2e
+          cache-on-failure: true
       - run: npm ci
       - name: Build the app (debug, UI embedded)
         run: npx tauri build --debug --no-bundle
