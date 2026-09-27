@@ -330,15 +330,26 @@ export function FileBrowser(p: Props) {
   // language and the buttons at the end are never cut off. Step 1 drops the
   // button labels. With window controls (Windows), no text is ever cut:
   // step 2 turns the search into a button that opens it in place of the
-  // folder name, and step 3 hides the folder name (the path bar still shows
-  // it). On macOS, steps 2 and 3 narrow the location and search instead.
+  // folder name, step 3 hides the folder name (the path bar still shows it)
+  // and step 4, needed only while searching in the narrowest windows, hides
+  // the list/grid switch. On macOS, steps 2 and 3 narrow the location and
+  // search instead. A short folder name only keeps the room it needs.
+  const searching = searchOpen || filter !== "";
   useLayoutEffect(() => {
     const bar = toolbarRef.current;
     if (!bar) return;
     const fit = () => {
       const last = bar.lastElementChild;
       if (!last) return;
-      for (const step of ["", "1", "1 2", "1 2 3"]) {
+      bar.dataset.compact = "";
+      const loc = bar.querySelector<HTMLElement>(".location");
+      const name = loc?.querySelector<HTMLElement>(".location-name");
+      if (loc && name) {
+        const icon = loc.firstElementChild?.getBoundingClientRect().width ?? 0;
+        const gap = parseFloat(getComputedStyle(loc).columnGap) || 0;
+        bar.style.setProperty("--title-need", `${Math.ceil(icon + gap + name.scrollWidth)}px`);
+      }
+      for (const step of ["", "1", "1 2", "1 2 3", "1 2 3 4"]) {
         bar.dataset.compact = step;
         const end = bar.getBoundingClientRect().right - parseFloat(getComputedStyle(bar).paddingRight);
         if (last.getBoundingClientRect().right <= end + 0.5) break;
@@ -348,7 +359,7 @@ export function FileBrowser(p: Props) {
     const observer = new ResizeObserver(fit);
     observer.observe(bar);
     return () => observer.disconnect();
-  }, [locale]);
+  }, [locale, searching, p.server?.name, p.share, p.path]);
 
   useEffect(() => {
     const onKey = (e: globalThis.KeyboardEvent) => {
@@ -869,7 +880,7 @@ export function FileBrowser(p: Props) {
   return (
     <div className="browser">
       <div
-        className={`toolbar${p.toolbarEnd ? " with-window-controls" : ""}${searchOpen || filter ? " searching" : ""}`}
+        className={`toolbar${p.toolbarEnd ? " with-window-controls" : ""}${searching ? " searching" : ""}`}
         ref={toolbarRef}
         data-tauri-drag-region
       >

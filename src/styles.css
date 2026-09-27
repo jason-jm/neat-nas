@@ -115,6 +115,10 @@ a { color: var(--accent); }
    as wide as its placeholder needs; on narrow windows it becomes a button
    that opens the search in place of the folder name. */
 .toolbar.with-window-controls .search { width: auto; min-width: auto; }
+.toolbar.with-window-controls .location { min-width: min(120px, var(--title-need, 120px)); }
+.toolbar.with-window-controls[data-compact~="1"] .location { min-width: min(96px, var(--title-need, 96px)); }
+.toolbar.with-window-controls[data-compact~="2"] .location { min-width: min(36px, var(--title-need, 36px)); }
+.toolbar.with-window-controls[data-compact~="4"] .segmented { display: none; }
 .toolbar.with-window-controls[data-compact~="2"]:not(.searching) .search { display: none; }
 .toolbar.with-window-controls[data-compact~="2"]:not(.searching) .search-toggle { display: inline-flex; }
 .toolbar.with-window-controls[data-compact~="2"].searching .location,
