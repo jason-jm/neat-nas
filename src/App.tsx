@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FolderUp } from "lucide-react";
 import type { DownloadItem, Entry, SavedServer, Settings, Share, TransferProgress, Unsubscribe } from "./types";
 import { api, errorOf, isTauri, logToBackend } from "./api";
-import { useI18n } from "./i18n";
+import { setLocalePref, useI18n, type LocalePref } from "./i18n";
 import { parentPath } from "./format";
 import { Sidebar, type ServerStatus } from "./components/Sidebar";
 import { FileBrowser, type BrowserView, type NavIntent, type ViewMode } from "./components/FileBrowser";
@@ -549,7 +549,8 @@ export default function App() {
 
   // ── Dev autopilot ─────────────────────────────────────────────────────
   // NEATNAS_DEV_AUTOPILOT="share=photo,open=2025/Kyoto,grid,preview=DSC_0003.jpg"
-  // Steps: share=, open=, grid, list, preview=, download=, transfers, settings, add, rects.
+  // Steps: share=, open=, grid, list, preview=, download=, transfers, settings, add, rects,
+  // lang= (a locale or "system"), wait= (milliseconds before the next step).
   // replays UI steps once the listing is on screen, so the real app can be
   // screenshotted by tooling. Inert unless the backend passes the string.
   const autopilotSteps = useRef<string[] | null>(null);
@@ -578,6 +579,7 @@ export default function App() {
       else if (step === "settings") setDialog({ kind: "settings" });
       else if (step === "add") setDialog({ kind: "add" });
       else if (step === "transfers") setTransfersOpen(true);
+      else if (step.startsWith("lang=")) setLocalePref(step.slice(5) as LocalePref);
       else if (step === "rects") {
         // Where each row sits in the window, for input-driving tests.
         const dpr = window.devicePixelRatio || 1;
@@ -591,7 +593,8 @@ export default function App() {
         if (target) void download([{ path: target.path, name: target.name, isDir: target.isDir }], false);
       }
       // Advance even when the step changed no state (e.g. mode already set).
-      window.setTimeout(() => setAutoTick((n) => n + 1), 900);
+      const pause = step.startsWith("wait=") ? Number(step.slice(5)) || 900 : 900;
+      window.setTimeout(() => setAutoTick((n) => n + 1), pause);
     }, 700);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps

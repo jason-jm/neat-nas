@@ -5,6 +5,8 @@
 #      checks the copies byte for byte.
 #   3. Drops a file from another window onto the app and checks that it is
 #      uploaded to the share.
+#   Before that, a toolbar tour photographs the toolbar in several languages
+#   and widths (contact sheets in the logs folder).
 #
 # Input is simulated with SendInput, so this needs an interactive desktop.
 # Usage (pwsh, as an administrator): scripts/e2e/windows-dragdrop.ps1 [-App path\to\neatnas.exe]
@@ -26,6 +28,37 @@ public static class Desk {
   [StructLayout(LayoutKind.Sequential)] public struct POINT { public int X, Y; }
   [StructLayout(LayoutKind.Sequential)] struct MOUSEINPUT { public int dx, dy; public uint mouseData, dwFlags, time; public IntPtr dwExtraInfo; }
   [StructLayout(LayoutKind.Sequential)] struct INPUT { public uint type; public MOUSEINPUT mi; }
+  [StructLayout(LayoutKind.Sequential)] struct KEYBDINPUT { public ushort wVk, wScan; public uint dwFlags, time; public IntPtr dwExtraInfo; }
+  [StructLayout(LayoutKind.Explicit, Size = 40)] struct KINPUT { [FieldOffset(0)] public uint type; [FieldOffset(8)] public KEYBDINPUT ki; }
+  [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+  struct DEVMODE {
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)] public string dmDeviceName;
+    public short dmSpecVersion, dmDriverVersion, dmSize, dmDriverExtra;
+    public int dmFields, dmPositionX, dmPositionY, dmDisplayOrientation, dmDisplayFixedOutput;
+    public short dmColor, dmDuplex, dmYResolution, dmTTOption, dmCollate;
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)] public string dmFormName;
+    public short dmLogPixels;
+    public int dmBitsPerPel, dmPelsWidth, dmPelsHeight, dmDisplayFlags, dmDisplayFrequency, dmICMMethod, dmICMIntent, dmMediaType, dmDitherType, dmReserved1, dmReserved2, dmPanningWidth, dmPanningHeight;
+  }
+  [DllImport("user32.dll", EntryPoint = "SendInput")] static extern uint SendKeyInput(uint count, KINPUT[] inputs, int size);
+  [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern bool EnumDisplaySettings(string device, int mode, ref DEVMODE dm);
+  [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int ChangeDisplaySettings(ref DEVMODE dm, int flags);
+  [DllImport("user32.dll")] public static extern bool PrintWindow(IntPtr hwnd, IntPtr hdc, uint flags);
+
+  /// 0 when the display switched to w x h.
+  public static int SetResolution(int w, int h) {
+    var dm = new DEVMODE();
+    dm.dmSize = (short)Marshal.SizeOf(typeof(DEVMODE));
+    if (!EnumDisplaySettings(null, -1, ref dm)) return -100;
+    dm.dmPelsWidth = w; dm.dmPelsHeight = h; dm.dmFields = 0x80000 | 0x100000;
+    return ChangeDisplaySettings(ref dm, 0);
+  }
+  public static void Key(ushort vk, bool up) {
+    var k = new KINPUT(); k.type = 1; k.ki.wVk = vk; k.ki.dwFlags = up ? 2u : 0u;
+    if (SendKeyInput(1, new[] { k }, Marshal.SizeOf(typeof(KINPUT))) != 1) throw new Exception("SendInput (key) failed: " + Marshal.GetLastWin32Error());
+  }
+  public static void Press(ushort vk) { Key(vk, false); Key(vk, true); }
+  public static void Chord(ushort modifier, ushort vk) { Key(modifier, false); Key(vk, false); Key(vk, true); Key(modifier, true); }
 
   [DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
   [DllImport("user32.dll")] public static extern int GetSystemMetrics(int index);
@@ -92,17 +125,38 @@ function Wait-Until([scriptblock]$Condition, [int]$Seconds, [string]$What) {
 
 function Log-Text { if (Test-Path $appLog) { Get-Content $appLog -Raw -ErrorAction SilentlyContinue } else { "" } }
 
-# A PNG of a screen area, for looking at the real Windows rendering later.
-function Snap([string]$name, [int]$x, [int]$y, [int]$w, [int]$h) {
+# The top strip of a window: from the screen when it fits, else PrintWindow.
+function Snap-Window([IntPtr]$hwnd, [string]$name, [int]$w, [int]$h, [string]$label) {
+  $path = Join-Path $Logs "$name.png"
+  $o = [Desk]::ClientOrigin($hwnd)
   $bmp = New-Object System.Drawing.Bitmap $w, $h
   $g = [System.Drawing.Graphics]::FromImage($bmp)
-  $g.CopyFromScreen($x, $y, 0, 0, $bmp.Size)
-  $g.Dispose()
-  $bmp.Save((Join-Path $Logs "$name.png"), [System.Drawing.Imaging.ImageFormat]::Png)
-  $bmp.Dispose()
+  if ($o.X -ge 0 -and $o.X + $w -le $screenW) {
+    $g.CopyFromScreen($o.X, $o.Y, 0, 0, $bmp.Size)
+  } else {
+    $hdc = $g.GetHdc(); [void][Desk]::PrintWindow($hwnd, $hdc, 2); $g.ReleaseHdc($hdc)
+  }
+  $g.Dispose(); $bmp.Save($path, [System.Drawing.Imaging.ImageFormat]::Png); $bmp.Dispose()
+  [pscustomobject]@{ Label = $label; Path = $path; Width = $w; Height = $h }
 }
 
-# False while a copy is still being written (Explorer holds it open).
+function Save-Sheet($shots, [string]$name) {
+  $pad = 10; $line = 20
+  $width = ($shots | Measure-Object -Property Width -Maximum).Maximum + 2 * $pad
+  $height = $pad + ($shots | ForEach-Object { $line + $_.Height + $pad } | Measure-Object -Sum).Sum
+  $sheet = New-Object System.Drawing.Bitmap ([int]$width), ([int]$height)
+  $g = [System.Drawing.Graphics]::FromImage($sheet)
+  $g.Clear([System.Drawing.Color]::FromArgb(238, 238, 238))
+  $font = New-Object System.Drawing.Font "Segoe UI", 10
+  $y = $pad
+  foreach ($s in $shots) {
+    $g.DrawString($s.Label, $font, [System.Drawing.Brushes]::Black, $pad, $y); $y += $line
+    $img = [System.Drawing.Image]::FromFile($s.Path); $g.DrawImage($img, $pad, $y, $img.Width, $img.Height); $img.Dispose()
+    $y += $s.Height + $pad
+  }
+  $g.Dispose(); $sheet.Save((Join-Path $Logs "$name.png"), [System.Drawing.Imaging.ImageFormat]::Png); $sheet.Dispose()
+}
+
 function Same-File($a, $b) {
   try { (Test-Path $a) -and (Test-Path $b) -and ((Get-FileHash $a -ErrorAction Stop).Hash -eq (Get-FileHash $b -ErrorAction Stop).Hash) }
   catch { $false }
@@ -110,6 +164,11 @@ function Same-File($a, $b) {
 
 # ── Desktop ──────────────────────────────────────────────────────────────
 Step "desktop"
+foreach ($mode in @(@(1920, 1080), @(1680, 1050), @(1600, 900), @(1440, 900))) {
+  $r = [Desk]::SetResolution($mode[0], $mode[1])
+  Write-Host "display $($mode[0])x$($mode[1]): $r"
+  if ($r -eq 0) { Start-Sleep -Seconds 2; break }
+}
 $screenW = [Desk]::GetSystemMetrics(0); $screenH = [Desk]::GetSystemMetrics(1)
 Write-Host "screen ${screenW}x${screenH}, session $([System.Diagnostics.Process]::GetCurrentProcess().SessionId), interactive $([Environment]::UserInteractive), apartment $([Threading.Thread]::CurrentThread.ApartmentState)"
 if ([Threading.Thread]::CurrentThread.ApartmentState -ne "STA") { throw "OLE drag and drop needs pwsh in STA mode" }
@@ -145,8 +204,55 @@ $config = @{
 } | ConvertTo-Json -Depth 5
 [IO.File]::WriteAllText((Join-Path $configDir "config.json"), $config, (New-Object Text.UTF8Encoding $false))
 $env:NEATNAS_CRED_STORE = "file"
-$env:NEATNAS_DEV_AUTOPILOT = "rects"
 $env:RUST_LOG = "info,smb2=warn,mdns_sd=warn"
+
+# ── Toolbar tour ─────────────────────────────────────────────────────────
+Step "toolbar tour"
+$tour = @("en", "zh-CN", "ja", "de", "fr", "ru")
+$widths = @(1400, 1280, 1120, 1000, 920) | Where-Object { $_ -le $screenW }
+$tourLog = Join-Path $Logs "tour.log"
+$env:NEATNAS_DEV_AUTOPILOT = "rects," + (($tour | ForEach-Object { "lang=$_,wait=16000" }) -join ",") + ",lang=system"
+$tourProc = Start-Process -FilePath $App -PassThru -RedirectStandardError $tourLog -RedirectStandardOutput (Join-Path $Logs "tour-stdout.log")
+try {
+  if (-not (Wait-Until { (Get-Content $tourLog -Raw -ErrorAction SilentlyContinue) -match "autopilot rect name=" } 120 "the tour listing")) { throw "tour: no listing" }
+  $tourProc.Refresh(); $th = $tourProc.MainWindowHandle
+  $park = { [Desk]::Move([int]($screenW / 2), $screenH - 90) }
+  foreach ($lang in $tour) {
+    if (-not (Wait-Until { (Get-Content $tourLog -Raw -ErrorAction SilentlyContinue) -match "autopilot step=lang=$([regex]::Escape($lang)) view" } 40 "the switch to $lang")) { Fail "tour: the app never switched to $lang"; break }
+    Start-Sleep -Milliseconds 800
+    $shots = [System.Collections.Generic.List[object]]::new()
+    foreach ($w in $widths) {
+      [void][Desk]::SetWindowPos($th, [IntPtr]::Zero, 0, 0, $w, 640, 0x0040)
+      & $park; Start-Sleep -Milliseconds 700
+      $shots.Add((Snap-Window $th "tour-$lang-$w" $w 58 "$lang, ${w}px"))
+    }
+    # Narrowest width: the search opened with Ctrl+F.
+    [void][Desk]::SetWindowPos($th, [IntPtr]::Zero, 0, 0, 920, 640, 0x0040)
+    [void][Desk]::SetForegroundWindow($th); Start-Sleep -Milliseconds 400
+    $o = [Desk]::ClientOrigin($th)
+    [Desk]::Move($o.X + 600, $o.Y + 420); [Desk]::Down($o.X + 600, $o.Y + 420); [Desk]::Up($o.X + 600, $o.Y + 420)
+    & $park; Start-Sleep -Milliseconds 300
+    [Desk]::Chord(0x11, 0x46); Start-Sleep -Milliseconds 700
+    $shots.Add((Snap-Window $th "tour-$lang-920-search" 920 58 "$lang, 920px, search opened (Ctrl+F)"))
+    [Desk]::Press(0x1B); Start-Sleep -Milliseconds 400
+    if ($lang -eq "en") {
+      [Desk]::Move($o.X + 897, $o.Y + 26); Start-Sleep -Milliseconds 500
+      $shots.Add((Snap-Window $th "tour-en-920-hover" 920 58 "en, 920px, close button hovered"))
+      & $park
+    }
+    Save-Sheet $shots "toolbar-$lang"
+    Pass "toolbar photographed in $lang"
+  }
+  # Let the tour put the language back before the app closes.
+  [void](Wait-Until { (Get-Content $tourLog -Raw -ErrorAction SilentlyContinue) -match "autopilot step=lang=system" } 25 "the language reset")
+}
+finally {
+  if (-not $tourProc.HasExited) { Stop-Process -Id $tourProc.Id -Force }
+  Start-Sleep -Milliseconds 800
+}
+
+# ── Drag and drop ────────────────────────────────────────────────────────
+$env:NEATNAS_DEV_AUTOPILOT = "rects"
 $proc = Start-Process -FilePath $App -PassThru -RedirectStandardError $appLog -RedirectStandardOutput (Join-Path $Logs "stdout.log")
 try {
   if (-not (Wait-Until { (Log-Text) -match "autopilot rect name=hello\.txt" } 120 "the share listing")) {
@@ -155,16 +261,6 @@ try {
   $proc.Refresh()
   $hwnd = $proc.MainWindowHandle
   if ($hwnd -eq [IntPtr]::Zero) { throw "no main window" }
-  # The toolbar at the default size and at the narrowest, close button hovered.
-  foreach ($width in @(1120, 920)) {
-    [void][Desk]::SetWindowPos($hwnd, [IntPtr]::Zero, 0, 0, $width, 640, 0x0040)
-    [void][Desk]::SetForegroundWindow($hwnd)
-    Start-Sleep -Milliseconds 700
-    $o = [Desk]::ClientOrigin($hwnd)
-    [Desk]::Move($o.X + $width - 23, $o.Y + 26); Start-Sleep -Milliseconds 500
-    Snap "toolbar-$width" $o.X $o.Y ([Math]::Min($width, $screenW - $o.X)) 120
-  }
-  [Desk]::Move(300, 700)
   # Top-left, at the minimum width; the rest of the screen is for Explorer.
   [void][Desk]::SetWindowPos($hwnd, [IntPtr]::Zero, 0, 0, 920, 640, 0x0040)
   [void][Desk]::SetForegroundWindow($hwnd)

@@ -108,9 +108,18 @@ a { color: var(--accent); }
 .toolbar[data-compact~="1"] .location { min-width: 96px; }
 .toolbar[data-compact~="2"] { gap: 4px; }
 .toolbar[data-compact~="2"] .location { min-width: 36px; margin: 0 2px; }
-.toolbar[data-compact~="2"] .search { min-width: 84px; }
-.toolbar[data-compact~="3"] .location { display: none; }
-.toolbar[data-compact~="3"] .search { min-width: 64px; }
+.toolbar:not(.with-window-controls)[data-compact~="2"] .search { min-width: 84px; }
+.toolbar:not(.with-window-controls)[data-compact~="3"] .location { display: none; }
+.toolbar:not(.with-window-controls)[data-compact~="3"] .search { min-width: 64px; }
+/* Windows: toolbar text is shown in full or not at all. The search box is
+   as wide as its placeholder needs; on narrow windows it becomes a button
+   that opens the search in place of the folder name. */
+.toolbar.with-window-controls .search { width: auto; min-width: auto; }
+.toolbar.with-window-controls[data-compact~="2"]:not(.searching) .search { display: none; }
+.toolbar.with-window-controls[data-compact~="2"]:not(.searching) .search-toggle { display: inline-flex; }
+.toolbar.with-window-controls[data-compact~="2"].searching .location,
+.toolbar.with-window-controls[data-compact~="3"] .location { display: none; }
+.toolbar.with-window-controls[data-compact~="2"].searching .search { flex: 1 1 auto; }
 .crumbs { display: flex; align-items: center; gap: 1px; min-width: 120px; flex: 1 1 auto; overflow: hidden; margin: 0 4px; }
 .crumb { padding: 4px 7px; border-radius: 6px; color: var(--text-2); white-space: nowrap; display: block; max-width: 200px; overflow: hidden; text-overflow: ellipsis; flex: none; }
 .crumb svg { vertical-align: -2px; margin-right: 6px; }
@@ -121,7 +130,15 @@ a { color: var(--accent); }
 .crumb-sep { color: var(--text-3); display: flex; flex: none; }
 .search { display: flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0 8px; height: 30px; width: 190px; color: var(--text-3); flex: none; transition: width 0.15s ease; }
 .search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-.search input { border: 0; outline: 0; background: transparent; width: 100%; color: var(--text); min-width: 0; }
+.search input { border: 0; outline: 0; background: transparent; width: 100%; color: var(--text); min-width: 0; padding: 0; }
+.search { position: relative; }
+.toolbar .search-toggle { display: none; }
+/* The sizer and the input share one grid cell; the sizer sets the width. */
+.search-field { flex: 1 1 auto; display: grid; align-items: center; min-width: 0; }
+.search-field > * { grid-area: 1 / 1; }
+.search-sizer { visibility: hidden; height: 0; white-space: nowrap; pointer-events: none; }
+.search .search-clear { position: absolute; right: 3px; top: 50%; transform: translateY(-50%); }
+.search.has-filter input { padding-right: 24px; }
 .search input::placeholder { color: var(--text-3); }
 .toolbar-sep { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
 
