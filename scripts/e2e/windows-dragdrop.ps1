@@ -1,0 +1,251 @@
+# End-to-end drag and drop on a real Windows desktop (the GitHub windows runner).
+#
+#   1. Shares a folder over SMB on this machine and points a fresh Neat NAS at it.
+#   2. Drags a file and a folder from the app into an Explorer window and
+#      checks the copies byte for byte.
+#   3. Drops a file from another window onto the app and checks that it is
+#      uploaded to the share.
+#
+# Input is simulated with SendInput, so this needs an interactive desktop.
+# Usage (pwsh, as an administrator): scripts/e2e/windows-dragdrop.ps1 [-App path\to\neatnas.exe]
+param(
+  [string]$App = "src-tauri\target\debug\neatnas.exe",
+  [string]$Logs = "e2e-logs"
+)
+$ErrorActionPreference = "Stop"
+Set-StrictMode -Version Latest
+
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
+using System.Threading;
+
+public static class Desk {
+  [StructLayout(LayoutKind.Sequential)] public struct POINT { public int X, Y; }
+  [StructLayout(LayoutKind.Sequential)] struct MOUSEINPUT { public int dx, dy; public uint mouseData, dwFlags, time; public IntPtr dwExtraInfo; }
+  [StructLayout(LayoutKind.Sequential)] struct INPUT { public uint type; public MOUSEINPUT mi; }
+
+  [DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
+  [DllImport("user32.dll")] public static extern int GetSystemMetrics(int index);
+  [DllImport("user32.dll")] public static extern bool GetCursorPos(out POINT p);
+  [DllImport("user32.dll")] public static extern bool ClientToScreen(IntPtr hwnd, ref POINT p);
+  [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr hwnd, IntPtr after, int x, int y, int cx, int cy, uint flags);
+  [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hwnd);
+  [DllImport("user32.dll")] static extern uint SendInput(uint count, INPUT[] inputs, int size);
+
+  const uint MOVE = 0x0001, LEFTDOWN = 0x0002, LEFTUP = 0x0004, ABSOLUTE = 0x8000;
+
+  static void Send(uint flags, int x, int y) {
+    int w = GetSystemMetrics(0), h = GetSystemMetrics(1);
+    var input = new INPUT { type = 0 };
+    input.mi.dx = (int)Math.Round(x * 65535.0 / (w - 1));
+    input.mi.dy = (int)Math.Round(y * 65535.0 / (h - 1));
+    input.mi.dwFlags = flags | ABSOLUTE | MOVE;
+    if (SendInput(1, new[] { input }, Marshal.SizeOf(typeof(INPUT))) != 1)
+      throw new Exception("SendInput failed: " + Marshal.GetLastWin32Error());
+  }
+  public static void Move(int x, int y) { Send(0, x, y); }
+  public static void Down(int x, int y) { Send(LEFTDOWN, x, y); }
+  public static void Up(int x, int y) { Send(LEFTUP, x, y); }
+  /// Move in small steps, so every window on the way sees the pointer pass.
+  public static void Glide(int x0, int y0, int x1, int y1, int steps, int pauseMs) {
+    for (int i = 1; i <= steps; i++) {
+      Move(x0 + (x1 - x0) * i / steps, y0 + (y1 - y0) * i / steps);
+      Thread.Sleep(pauseMs);
+    }
+  }
+  /// Glide and release on a thread of its own (for while a drag loop runs here).
+  public static Thread GlideLater(int x0, int y0, int x1, int y1, int delayMs, int holdMs) {
+    var t = new Thread(() => { Thread.Sleep(delayMs); Glide(x0, y0, x1, y1, 40, 25); Thread.Sleep(holdMs); Up(x1, y1); });
+    t.IsBackground = true;
+    t.Start();
+    return t;
+  }
+  public static POINT Cursor() { POINT p; GetCursorPos(out p); return p; }
+  public static POINT ClientOrigin(IntPtr hwnd) { var p = new POINT(); ClientToScreen(hwnd, ref p); return p; }
+}
+"@
+[void][Desk]::SetProcessDPIAware()
+
+$root = (Resolve-Path .).Path
+$App = (Resolve-Path $App).Path
+New-Item -ItemType Directory -Force $Logs | Out-Null
+$Logs = (Resolve-Path $Logs).Path
+$appLog = Join-Path $Logs "neatnas.log"
+$failures = [System.Collections.Generic.List[string]]::new()
+
+function Step($text) { Write-Host "`n== $text" }
+function Fail($text) { Write-Host "FAIL: $text"; $failures.Add($text) }
+function Pass($text) { Write-Host "ok: $text" }
+
+function Wait-Until([scriptblock]$Condition, [int]$Seconds, [string]$What) {
+  $deadline = (Get-Date).AddSeconds($Seconds)
+  while ((Get-Date) -lt $deadline) {
+    if (& $Condition) { return $true }
+    Start-Sleep -Milliseconds 250
+  }
+  Write-Host "timed out after ${Seconds}s waiting for $What"
+  return $false
+}
+
+function Log-Text { if (Test-Path $appLog) { Get-Content $appLog -Raw -ErrorAction SilentlyContinue } else { "" } }
+
+function Same-File($a, $b) {
+  (Test-Path $a) -and (Test-Path $b) -and ((Get-FileHash $a).Hash -eq (Get-FileHash $b).Hash)
+}
+
+# ── Desktop ──────────────────────────────────────────────────────────────
+Step "desktop"
+$screenW = [Desk]::GetSystemMetrics(0); $screenH = [Desk]::GetSystemMetrics(1)
+Write-Host "screen ${screenW}x${screenH}, session $([System.Diagnostics.Process]::GetCurrentProcess().SessionId), interactive $([Environment]::UserInteractive), apartment $([Threading.Thread]::CurrentThread.ApartmentState)"
+if ([Threading.Thread]::CurrentThread.ApartmentState -ne "STA") { throw "OLE drag and drop needs pwsh in STA mode" }
+[Desk]::Move(200, 200); Start-Sleep -Milliseconds 100
+$c = [Desk]::Cursor()
+if ($c.X -ne 200 -or $c.Y -ne 200) { throw "simulated input does not reach this desktop (cursor at $($c.X),$($c.Y))" }
+Pass "simulated input moves the cursor"
+
+# ── SMB share ────────────────────────────────────────────────────────────
+Step "SMB share"
+$share = "C:\e2e-share"
+$password = "N3at-Nas-E2E!2026"
+Remove-Item -Recurse -Force $share -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Force "$share\Folder\Sub" | Out-Null
+[IO.File]::WriteAllText("$share\hello.txt", "hello from the Windows runner`r`n")
+$bytes = New-Object byte[] (5MB + 123); (New-Object Random 42).NextBytes($bytes)
+[IO.File]::WriteAllBytes("$share\Folder\big.bin", $bytes)
+[IO.File]::WriteAllText("$share\Folder\Sub\deep.txt", "deep inside")
+net user nastest $password /add /y | Out-Null
+icacls $share /grant "nastest:(OI)(CI)F" | Out-Null
+if (-not (Get-SmbShare -Name e2e -ErrorAction SilentlyContinue)) { New-SmbShare -Name e2e -Path $share -FullAccess nastest | Out-Null }
+if ((Get-Service LanmanServer).Status -ne "Running") { Start-Service LanmanServer }
+Get-Service LanmanServer | Format-Table -AutoSize Name, Status | Out-String | Write-Host
+Pass "\\127.0.0.1\e2e serves $share"
+
+# ── App ──────────────────────────────────────────────────────────────────
+Step "app"
+$configDir = Join-Path $env:APPDATA "com.neatnas.app"
+New-Item -ItemType Directory -Force $configDir | Out-Null
+$config = @{
+  servers = @(@{ id = "e2e"; name = "E2E"; host = "127.0.0.1"; port = 445; username = "nastest"; domain = ""; lastShare = "e2e"; addedAt = 0 })
+  insecurePasswords = @{ e2e = $password }
+} | ConvertTo-Json -Depth 5
+[IO.File]::WriteAllText((Join-Path $configDir "config.json"), $config, (New-Object Text.UTF8Encoding $false))
+$env:NEATNAS_CRED_STORE = "file"
+$env:NEATNAS_DEV_AUTOPILOT = "rects"
+$env:RUST_LOG = "info,smb2=warn,mdns_sd=warn"
+$proc = Start-Process -FilePath $App -PassThru -RedirectStandardError $appLog -RedirectStandardOutput (Join-Path $Logs "stdout.log")
+try {
+  if (-not (Wait-Until { (Log-Text) -match "autopilot rect name=hello\.txt" } 120 "the share listing")) {
+    throw "the app never showed the share listing; see $appLog"
+  }
+  $proc.Refresh()
+  $hwnd = $proc.MainWindowHandle
+  if ($hwnd -eq [IntPtr]::Zero) { throw "no main window" }
+  # Top-left, at the minimum width; the rest of the screen is for Explorer.
+  [void][Desk]::SetWindowPos($hwnd, [IntPtr]::Zero, 0, 0, 920, 640, 0x0040)
+  [void][Desk]::SetForegroundWindow($hwnd)
+  Start-Sleep -Milliseconds 800
+  Pass "listing on screen"
+
+  # Row positions reported by the app (CSS pixels in the window).
+  $rows = @{}
+  foreach ($m in [regex]::Matches((Log-Text), "autopilot rect name=(.+?) x=(-?\d+) y=(-?\d+) w=(\d+) h=(\d+) dpr=([\d.]+)")) {
+    $rows[$m.Groups[1].Value] = [pscustomobject]@{ X = [int]$m.Groups[2].Value; Y = [int]$m.Groups[3].Value; W = [int]$m.Groups[4].Value; H = [int]$m.Groups[5].Value; Dpr = [double]$m.Groups[6].Value }
+  }
+  Write-Host ("rows: " + (($rows.Keys | Sort-Object) -join ", "))
+  $origin = [Desk]::ClientOrigin($hwnd)
+  function Row-Point($name) {
+    $r = $rows[$name]
+    if (-not $r) { throw "no row named $name" }
+    [pscustomobject]@{ X = [int]($origin.X + ($r.X + 60) * $r.Dpr); Y = [int]($origin.Y + ($r.Y + $r.H / 2) * $r.Dpr) }
+  }
+
+  # ── Drag out to Explorer ───────────────────────────────────────────────
+  Step "drag to Explorer"
+  $out = "C:\e2e-out"
+  Remove-Item -Recurse -Force $out -ErrorAction SilentlyContinue
+  New-Item -ItemType Directory -Force $out | Out-Null
+  Start-Process explorer.exe $out
+  $shell = New-Object -ComObject Shell.Application
+  $explorer = $null
+  [void](Wait-Until { $script:explorer = @($shell.Windows() | Where-Object { $_.LocationURL -like "*e2e-out*" })[0]; $null -ne $script:explorer } 30 "the Explorer window")
+  if (-not $explorer) { throw "Explorer did not open $out" }
+  $ex = [IntPtr][long]$explorer.HWND
+  $exW = 440; $exH = [Math]::Min(380, $screenH - 360)
+  $exX = $screenW - $exW - 10; $exY = 300
+  [void][Desk]::SetWindowPos($ex, [IntPtr](-1), $exX, $exY, $exW, $exH, 0x0040) # topmost, shown
+  Start-Sleep -Milliseconds 1500
+  $dropX = $exX + [int]($exW / 2); $dropY = $exY + [int]($exH / 2) + 20
+
+  function Drag-Out($name) {
+    $p = Row-Point $name
+    [Desk]::Move($p.X, $p.Y); Start-Sleep -Milliseconds 300
+    [Desk]::Down($p.X, $p.Y); Start-Sleep -Milliseconds 200
+    # Past the app's 6px threshold; the app then hands the gesture to Windows.
+    [Desk]::Glide($p.X, $p.Y, $p.X + 30, $p.Y + 12, 10, 25)
+    Start-Sleep -Milliseconds 1200
+    [Desk]::Glide($p.X + 30, $p.Y + 12, $dropX, $dropY, 40, 25)
+    Start-Sleep -Milliseconds 800
+    [Desk]::Up($dropX, $dropY)
+  }
+
+  Drag-Out "hello.txt"
+  if (Wait-Until { Same-File "$share\hello.txt" "$out\hello.txt" } 60 "hello.txt in Explorer") { Pass "file dragged to Explorer arrived intact" }
+  else { Fail "hello.txt did not arrive in $out" }
+
+  Drag-Out "Folder"
+  $folderOk = Wait-Until { (Same-File "$share\Folder\big.bin" "$out\Folder\big.bin") -and (Same-File "$share\Folder\Sub\deep.txt" "$out\Folder\Sub\deep.txt") } 120 "Folder in Explorer"
+  if ($folderOk) { Pass "folder dragged to Explorer arrived intact (5 MB file and a nested folder)" }
+  else { Fail "Folder did not arrive complete in $out" }
+  Get-ChildItem -Recurse $out | Format-Table -AutoSize FullName, Length | Out-String | Write-Host
+  [void][Desk]::SetWindowPos($ex, [IntPtr](-2), 0, 0, 0, 0, 0x0003) # no longer topmost
+  $explorer.Quit()
+
+  # ── Drop onto the app ──────────────────────────────────────────────────
+  Step "drop onto the app"
+  $drop = "C:\e2e-drop\dropped.txt"
+  New-Item -ItemType Directory -Force (Split-Path $drop) | Out-Null
+  [IO.File]::WriteAllText($drop, "dropped from Explorer at $(Get-Date -Format o)`r`n")
+  [void][Desk]::SetForegroundWindow($hwnd)
+  $targetX = $origin.X + 560; $targetY = $origin.Y + 420
+
+  $form = New-Object System.Windows.Forms.Form
+  $form.Text = "drag source"; $form.TopMost = $true; $form.ShowInTaskbar = $false
+  $form.FormBorderStyle = "FixedToolWindow"; $form.StartPosition = "Manual"
+  $form.Location = New-Object System.Drawing.Point(($screenW - 170), 360); $form.Size = New-Object System.Drawing.Size(150, 120)
+  $form.Add_Shown({
+    $form.Activate()
+    $sx = $form.Left + 75; $sy = $form.Top + 70
+    [Desk]::Move($sx, $sy); Start-Sleep -Milliseconds 200
+    [Desk]::Down($sx, $sy); Start-Sleep -Milliseconds 150
+    [System.Windows.Forms.Application]::DoEvents()
+    $mover = [Desk]::GlideLater($sx, $sy, $targetX, $targetY, 600, 800)
+    $data = New-Object System.Windows.Forms.DataObject
+    $files = New-Object System.Collections.Specialized.StringCollection
+    [void]$files.Add($drop)
+    $data.SetFileDropList($files)
+    $effect = $form.DoDragDrop($data, [System.Windows.Forms.DragDropEffects]::Copy)
+    Write-Host "DoDragDrop returned $effect"
+    $mover.Join()
+    $form.Close()
+  })
+  [void]$form.ShowDialog()
+
+  if (Wait-Until { (Log-Text) -match "file drop: 1 item" } 15 "the app to report the drop") { Pass "the app received the drop" }
+  else { Fail "the app never reported the drop" }
+  if (Wait-Until { Same-File $drop "$share\dropped.txt" } 60 "the upload") { Pass "dropped file was uploaded to the share" }
+  else { Fail "dropped.txt did not reach $share" }
+}
+finally {
+  if (-not $proc.HasExited) { Stop-Process -Id $proc.Id -Force }
+  Start-Sleep -Milliseconds 500
+  Write-Host "`n== app log (drag, drop and errors)"
+  Get-Content $appLog | Select-String -Pattern "drag|drop|error|ERROR|WARN" | Select-Object -Last 60 | ForEach-Object { Write-Host $_.Line }
+}
+
+if ($failures.Count -gt 0) {
+  Write-Host "`n$($failures.Count) check(s) failed:"; $failures | ForEach-Object { Write-Host " - $_" }
+  exit 1
+}
+Write-Host "`nall drag and drop checks passed"

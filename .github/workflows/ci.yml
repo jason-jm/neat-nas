@@ -33,3 +33,31 @@ jobs:
       - name: Drag to Explorer (virtual files through the real shell)
         if: runner.os == 'Windows'
         run: cargo test --manifest-path src-tauri/Cargo.toml -p win-drag -- --nocapture
+
+  e2e-windows:
+    name: Drag and drop (Windows, end to end)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+          key: e2e
+      - run: npm ci
+      - name: Build the app (debug, UI embedded)
+        run: npx tauri build --debug --no-bundle
+      - name: Drag to Explorer and drop onto the app, against a local SMB share
+        shell: pwsh
+        run: ./scripts/e2e/windows-dragdrop.ps1
+      - name: Keep the logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-windows-logs
+          path: e2e-logs
+          if-no-files-found: ignore

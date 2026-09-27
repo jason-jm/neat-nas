@@ -549,7 +549,7 @@ export default function App() {
 
   // ── Dev autopilot ─────────────────────────────────────────────────────
   // NEATNAS_DEV_AUTOPILOT="share=photo,open=2025/Kyoto,grid,preview=DSC_0003.jpg"
-  // Steps: share=, open=, grid, list, preview=, download=, transfers, settings, add.
+  // Steps: share=, open=, grid, list, preview=, download=, transfers, settings, add, rects.
   // replays UI steps once the listing is on screen, so the real app can be
   // screenshotted by tooling. Inert unless the backend passes the string.
   const autopilotSteps = useRef<string[] | null>(null);
@@ -578,7 +578,15 @@ export default function App() {
       else if (step === "settings") setDialog({ kind: "settings" });
       else if (step === "add") setDialog({ kind: "add" });
       else if (step === "transfers") setTransfersOpen(true);
-      else if (step.startsWith("download=")) {
+      else if (step === "rects") {
+        // Where each row sits in the window, for input-driving tests.
+        const dpr = window.devicePixelRatio || 1;
+        document.querySelectorAll<HTMLElement>(".content [data-index]").forEach((row) => {
+          const r = row.getBoundingClientRect();
+          const name = row.querySelector(".file-name, .label")?.textContent ?? "";
+          logToBackend(`autopilot rect name=${name} x=${Math.round(r.left)} y=${Math.round(r.top)} w=${Math.round(r.width)} h=${Math.round(r.height)} dpr=${dpr}`);
+        });
+      } else if (step.startsWith("download=")) {
         const target = entries.find((e) => e.name === step.slice(9));
         if (target) void download([{ path: target.path, name: target.name, isDir: target.isDir }], false);
       }
