@@ -3,6 +3,7 @@
 #
 #   scripts/release.sh 1.0.2            # notes from docs/marketing/release-notes-v1.0.2.md if present
 #   scripts/release.sh 1.0.2 notes.md   # explicit release notes
+#   RESUME=1 scripts/release.sh 1.0.2   # continue an interrupted release after its tag
 #
 # 1. Bumps the version in package.json, Cargo.toml/Cargo.lock and
 #    tauri.conf.json, commits, tags and pushes.
@@ -21,13 +22,27 @@ tag="v$version"
 repo="jason-jm/neat-nas"
 notes="${2:-docs/marketing/release-notes-$tag.md}"
 dir="release/$version"
+resume="${RESUME:-}"
+# A resumed release reuses a macOS build that already made it through notarization.
+mac_done() {
+  [ -f "$dir/updater/Neat NAS.app.tar.gz.sig" ] && [ -f "$dir/Neat NAS_${version}_universal-mac.zip" ] &&
+    spctl -a -t open --context context:primary-signature "$dir/Neat NAS_${version}_universal.dmg" >/dev/null 2>&1
+}
 
 [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "version must look like 1.2.3"; exit 1; }
 [ -z "$(git status --porcelain)" ] || { echo "commit or stash your changes first"; git status --short; exit 1; }
 gh auth status >/dev/null 2>&1 || { echo "gh is not logged in"; exit 1; }
-git rev-parse -q --verify "refs/tags/$tag" >/dev/null && { echo "tag $tag already exists"; exit 1; }
-scripts/build-mac.sh --preflight
+if [ -n "$resume" ]; then
+  git rev-parse -q --verify "refs/tags/$tag" >/dev/null || { echo "RESUME=1 continues a release after its tag, but $tag does not exist"; exit 1; }
+  [ "$(python3 -c 'import json; print(json.load(open("package.json"))["version"])')" = "$version" ] || { echo "package.json is not at $version"; exit 1; }
+else
+  git rev-parse -q --verify "refs/tags/$tag" >/dev/null && { echo "tag $tag already exists (RESUME=1 continues an interrupted release)"; exit 1; }
+fi
+[ -n "$resume" ] && mac_done || scripts/build-mac.sh --preflight
 
+if [ -n "$resume" ]; then
+  echo "== resuming $tag"
+else
 echo "== bumping to $version"
 python3 - "$version" <<'PY'
 import json, pathlib, re, sys
@@ -44,37 +59,51 @@ git commit -q -m "Release $version"
 git tag -a "$tag" -m "Neat NAS $version"
 git push
 git push origin "$tag"
+fi
 
 mac_log="$(mktemp -d)/build-mac.log"
-echo "== building, signing and notarizing the macOS app on this Mac (log: $mac_log)"
-# Own process group, so an early exit can stop the whole build (npm, cargo, notarytool).
-set -m
-scripts/build-mac.sh > "$mac_log" 2>&1 &
-mac_pid=$!
-set +m
-trap 'kill -- -"$mac_pid" 2>/dev/null || true' EXIT
+mac_pid=""
+if [ -n "$resume" ] && mac_done; then
+  echo "== reusing the notarized macOS build in $dir"
+else
+  echo "== building, signing and notarizing the macOS app on this Mac (log: $mac_log)"
+  # Own process group, so an early exit can stop the whole build (npm, cargo, notarytool).
+  set -m
+  scripts/build-mac.sh > "$mac_log" 2>&1 &
+  mac_pid=$!
+  set +m
+  trap 'kill -- -"$mac_pid" 2>/dev/null || true' EXIT
+fi
 
 echo "== waiting for the Release workflow (Windows)"
 run_id=""
 for _ in $(seq 1 30); do
-  run_id=$(gh run list --repo "$repo" --workflow Release --branch "$tag" --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+  run_id=$(gh run list --repo "$repo" --workflow Release --branch "$tag" --limit 1 --json databaseId --jq '.[0].databaseId // empty' 2>/dev/null || true)
   [ -n "$run_id" ] && break
   sleep 10
 done
 [ -n "$run_id" ] || { echo "the Release workflow did not start; check https://github.com/$repo/actions"; exit 1; }
 echo "run: https://github.com/$repo/actions/runs/$run_id"
+# A dropped request is not a failed build: ask again rather than give up
+# (a transient EOF from the API once stopped a release here).
 for _ in $(seq 1 180); do
-  status=$(gh run view "$run_id" --repo "$repo" --json status --jq .status)
+  status=$(gh run view "$run_id" --repo "$repo" --json status --jq .status 2>/dev/null || echo unknown)
   [ "$status" = "completed" ] && break
   sleep 20
 done
-conclusion=$(gh run view "$run_id" --repo "$repo" --json conclusion --jq .conclusion)
+conclusion=""
+for _ in $(seq 1 6); do
+  conclusion=$(gh run view "$run_id" --repo "$repo" --json conclusion --jq .conclusion 2>/dev/null) && break
+  sleep 10
+done
 [ "$conclusion" = "success" ] || { echo "workflow finished with: $conclusion"; gh run view "$run_id" --repo "$repo" --log-failed | tail -40; exit 1; }
 
-echo "== waiting for the macOS build"
-if ! wait "$mac_pid"; then echo "the macOS build failed, so the draft stays unpublished:"; tail -n 40 "$mac_log"; exit 1; fi
-trap - EXIT
-grep -E "Accepted|accepted|source=" "$mac_log" | sed 's/^ */  /'
+if [ -n "$mac_pid" ]; then
+  echo "== waiting for the macOS build"
+  if ! wait "$mac_pid"; then echo "the macOS build failed, so the draft stays unpublished (fix it, then RESUME=1 $0 $version):"; tail -n 40 "$mac_log"; exit 1; fi
+  trap - EXIT
+  grep -E "Accepted|accepted|source=" "$mac_log" | sed 's/^ */  /'
+fi
 
 echo "== adding the macOS files to the draft"
 gh release upload "$tag" --repo "$repo" --clobber \
