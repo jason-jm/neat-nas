@@ -327,13 +327,12 @@ export function FileBrowser(p: Props) {
 
   // When the toolbar runs out of room it gives up space step by step,
   // measured rather than tied to a window width, so it holds for every
-  // language and the buttons at the end are never cut off. Step 1 drops the
-  // button labels. With window controls (Windows), no text is ever cut:
-  // step 2 turns the search into a button that opens it in place of the
-  // folder name, step 3 hides the folder name (the path bar still shows it)
-  // and step 4, needed only while searching in the narrowest windows, hides
-  // the list/grid switch. On macOS, steps 2 and 3 narrow the location and
-  // search instead. A short folder name only keeps the room it needs.
+  // language and the buttons at the end are never cut off. No text is ever
+  // cut either: step 1 drops the button labels, step 2 turns the search into
+  // a button that opens it in place of the folder name, step 3 hides the
+  // folder name (the path bar still shows it) and step 4, needed only while
+  // searching in the narrowest windows, hides the list/grid switch. A short
+  // folder name only keeps the room it needs.
   const searching = searchOpen || filter !== "";
   useLayoutEffect(() => {
     const bar = toolbarRef.current;

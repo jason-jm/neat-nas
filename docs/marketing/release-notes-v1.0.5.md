@@ -1,11 +1,11 @@
 ## Neat NAS 1.0.5
 
-Drag and drop on Windows, and a tidier Windows title bar.
+Drag and drop on Windows, and a toolbar that never cuts anything off.
 
 ### What's new
 
 - **Drag files into Explorer on Windows.** Drag files or whole folders from Neat NAS onto an Explorer window or the desktop. Explorer copies them straight from the NAS with its usual progress window; nothing is downloaded first.
-- **The close button is whole again.** On Windows the toolbar no longer runs under the window buttons. When the window gets narrow it hides button labels first, in every language, and never cuts off a button.
+- **Nothing in the toolbar is cut off.** On Mac and Windows, in all ten languages, button labels and the search hint are shown in full or left out. In a narrow window the search becomes a magnifier button (or press ⌘F / Ctrl+F) that opens where the folder name was. On Windows, the close button is whole again.
 - **The upload overlay only shows for files.** Dragging text or links over the window no longer offers to upload.
 
 Copies of 1.0.0 to 1.0.4 offer this update in Settings. Coming from 1.0.0 or 1.0.1, macOS asks once more for keychain access after the update: choose **Always Allow**.

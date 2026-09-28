@@ -105,25 +105,21 @@ a { color: var(--accent); }
 .toolbar[data-compact~="1"] .toolbar-sep,
 .toolbar[data-compact~="1"] .btn.upload-btn svg:last-child { display: none; }
 .toolbar[data-compact~="1"] .btn.with-label { width: 30px; padding: 0; }
-.toolbar[data-compact~="1"] .location { min-width: 96px; }
+/* Toolbar text is shown in full or not at all. The search box is as wide as
+   its placeholder needs (see .search-sizer), and a folder name keeps only the
+   room it needs, up to these limits. Step 2 turns the search into a button
+   that opens it in place of the folder name, step 3 hides the folder name
+   and step 4 (only while searching) the list/grid switch. */
+.toolbar .location { min-width: min(120px, var(--title-need, 120px)); }
+.toolbar[data-compact~="1"] .location { min-width: min(96px, var(--title-need, 96px)); }
 .toolbar[data-compact~="2"] { gap: 4px; }
-.toolbar[data-compact~="2"] .location { min-width: 36px; margin: 0 2px; }
-.toolbar:not(.with-window-controls)[data-compact~="2"] .search { min-width: 84px; }
-.toolbar:not(.with-window-controls)[data-compact~="3"] .location { display: none; }
-.toolbar:not(.with-window-controls)[data-compact~="3"] .search { min-width: 64px; }
-/* Windows: toolbar text is shown in full or not at all. The search box is
-   as wide as its placeholder needs; on narrow windows it becomes a button
-   that opens the search in place of the folder name. */
-.toolbar.with-window-controls .search { width: auto; min-width: auto; }
-.toolbar.with-window-controls .location { min-width: min(120px, var(--title-need, 120px)); }
-.toolbar.with-window-controls[data-compact~="1"] .location { min-width: min(96px, var(--title-need, 96px)); }
-.toolbar.with-window-controls[data-compact~="2"] .location { min-width: min(36px, var(--title-need, 36px)); }
-.toolbar.with-window-controls[data-compact~="4"] .segmented { display: none; }
-.toolbar.with-window-controls[data-compact~="2"]:not(.searching) .search { display: none; }
-.toolbar.with-window-controls[data-compact~="2"]:not(.searching) .search-toggle { display: inline-flex; }
-.toolbar.with-window-controls[data-compact~="2"].searching .location,
-.toolbar.with-window-controls[data-compact~="3"] .location { display: none; }
-.toolbar.with-window-controls[data-compact~="2"].searching .search { flex: 1 1 auto; }
+.toolbar[data-compact~="2"] .location { min-width: min(36px, var(--title-need, 36px)); margin: 0 2px; }
+.toolbar[data-compact~="2"]:not(.searching) .search { display: none; }
+.toolbar[data-compact~="2"]:not(.searching) .search-toggle { display: inline-flex; }
+.toolbar[data-compact~="2"].searching .location,
+.toolbar[data-compact~="3"] .location { display: none; }
+.toolbar[data-compact~="2"].searching .search { flex: 1 1 auto; }
+.toolbar[data-compact~="4"] .segmented { display: none; }
 .crumbs { display: flex; align-items: center; gap: 1px; min-width: 120px; flex: 1 1 auto; overflow: hidden; margin: 0 4px; }
 .crumb { padding: 4px 7px; border-radius: 6px; color: var(--text-2); white-space: nowrap; display: block; max-width: 200px; overflow: hidden; text-overflow: ellipsis; flex: none; }
 .crumb svg { vertical-align: -2px; margin-right: 6px; }
@@ -363,7 +359,7 @@ a { color: var(--accent); }
 /* ── Status bar, toolbar density, share rows ─────────────────────────── */
 .statusbar { height: 24px; flex: none; display: flex; align-items: center; padding: 0 14px; font-size: 11.5px; color: var(--text-3); border-top: 1px solid var(--border); background: var(--bg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; user-select: none; }
 .toolbar .btn .label { margin-left: 2px; }
-.search { flex: 0 1 190px; min-width: 120px; }
+.search { flex: 0 1 190px; width: auto; min-width: auto; }
 .search.disabled { opacity: 0.5; }
 .search input:disabled { cursor: default; }
 .file-icon.share { color: var(--accent); }
