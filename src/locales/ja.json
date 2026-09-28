@@ -167,5 +167,6 @@
   "settings.doubleClick": "ファイルをダブルクリックしたとき",
   "settings.doubleClickHint": "クイックルックはどのファイルでも開けます。表示できない種類は案内とダウンロードボタンを表示します。スペースキーは常にクイックルックです。",
   "settings.action.preview": "クイックルック",
-  "settings.action.download": "ダウンロード"
+  "settings.action.download": "ダウンロード",
+  "toast.dragSkipped": "{n} 個の項目はパスが長すぎてエクスプローラーにドラッグできないため、除外しました。「ダウンロード」を使ってください。"
 }

@@ -285,6 +285,8 @@ function GridCell({
 export function FileBrowser(p: Props) {
   const { t, locale } = useI18n();
   const [filter, setFilter] = useState("");
+  /** The search opened from its button when the toolbar is too narrow to show it. */
+  const [searchOpen, setSearchOpen] = useState(false);
   const [sort, setSort] = useState<{ key: SortKey; asc: boolean }>({ key: "name", asc: true });
   const [selection, setSelection] = useState<Set<string>>(new Set());
   const [anchor, setAnchor] = useState<number | null>(null);
@@ -293,6 +295,7 @@ export function FileBrowser(p: Props) {
   const [manualShare, setManualShare] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const toolbarRef = useRef<HTMLDivElement>(null);
   // Rubber-band selection state. Coordinates are content-relative and
   // include the scroll offset, so the box stays put while auto-scrolling.
   const marqueeRef = useRef<{ startX: number; startY: number; additive: boolean; base: Set<string>; active: boolean } | null>(null);
@@ -318,19 +321,61 @@ export function FileBrowser(p: Props) {
     setSelection(new Set());
     setAnchor(null);
     setFilter("");
+    setSearchOpen(false);
     setMenu(null);
   }
+
+  // When the toolbar runs out of room it gives up space step by step,
+  // measured rather than tied to a window width, so it holds for every
+  // language and the buttons at the end are never cut off. No text is ever
+  // cut either: step 1 drops the button labels, step 2 turns the search into
+  // a button that opens it in place of the folder name, step 3 hides the
+  // folder name (the path bar still shows it) and step 4, needed only while
+  // searching in the narrowest windows, hides the list/grid switch. A short
+  // folder name only keeps the room it needs.
+  const searching = searchOpen || filter !== "";
+  useLayoutEffect(() => {
+    const bar = toolbarRef.current;
+    if (!bar) return;
+    const fit = () => {
+      const last = bar.lastElementChild;
+      if (!last) return;
+      bar.dataset.compact = "";
+      const loc = bar.querySelector<HTMLElement>(".location");
+      const name = loc?.querySelector<HTMLElement>(".location-name");
+      if (loc && name) {
+        const icon = loc.firstElementChild?.getBoundingClientRect().width ?? 0;
+        const gap = parseFloat(getComputedStyle(loc).columnGap) || 0;
+        bar.style.setProperty("--title-need", `${Math.ceil(icon + gap + name.scrollWidth)}px`);
+      }
+      for (const step of ["", "1", "1 2", "1 2 3", "1 2 3 4"]) {
+        bar.dataset.compact = step;
+        const end = bar.getBoundingClientRect().right - parseFloat(getComputedStyle(bar).paddingRight);
+        if (last.getBoundingClientRect().right <= end + 0.5) break;
+      }
+    };
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(bar);
+    return () => observer.disconnect();
+  }, [locale, searching, p.server?.name, p.share, p.path]);
 
   useEffect(() => {
     const onKey = (e: globalThis.KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "f" && browsing) {
         e.preventDefault();
+        setSearchOpen(true);
         searchRef.current?.focus();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [browsing]);
+
+  // Opened from its button: the field only exists after this render.
+  useEffect(() => {
+    if (searchOpen) searchRef.current?.focus();
+  }, [searchOpen]);
 
   const visible = useMemo<Item[]>(() => {
     const q = filter.trim().toLowerCase();
@@ -833,7 +878,11 @@ export function FileBrowser(p: Props) {
 
   return (
     <div className="browser">
-      <div className={`toolbar${p.toolbarEnd ? " with-window-controls" : ""}`} data-tauri-drag-region>
+      <div
+        className={`toolbar${p.toolbarEnd ? " with-window-controls" : ""}${searching ? " searching" : ""}`}
+        ref={toolbarRef}
+        data-tauri-drag-region
+      >
         <Button variant="ghost" iconOnly onClick={p.onBack} disabled={!p.canBack} title={t("browser.back")}>
           <ChevronLeft size={17} />
         </Button>
@@ -851,23 +900,53 @@ export function FileBrowser(p: Props) {
             </>
           )}
         </div>
-        <div className={`search${p.view === "files" ? "" : " disabled"}`}>
+        <Button
+          variant="ghost"
+          iconOnly
+          className="search-toggle"
+          disabled={p.view !== "files" && !atRoot}
+          title={t("browser.search")}
+          onClick={() => setSearchOpen(true)}
+        >
+          <Search size={16} />
+        </Button>
+        <div className={`search${p.view === "files" ? "" : " disabled"}${filter ? " has-filter" : ""}`}>
           <Search size={14} />
-          <input
-            ref={searchRef}
-            value={filter}
-            disabled={p.view !== "files" && !atRoot}
-            onChange={(e) => setFilter(e.target.value)}
-            placeholder={t("browser.search")}
-            onKeyDown={(e) => {
-              if (e.key === "Escape") {
-                setFilter("");
-                (e.target as HTMLInputElement).blur();
-              }
-            }}
-          />
+          <span className="search-field">
+            {/* Holds the box open to the placeholder's width, so it is never cut off. */}
+            <span className="search-sizer" aria-hidden="true">
+              {t("browser.search")}
+            </span>
+            <input
+              ref={searchRef}
+              size={1}
+              value={filter}
+              disabled={p.view !== "files" && !atRoot}
+              onChange={(e) => setFilter(e.target.value)}
+              onBlur={() => {
+                if (!filter) setSearchOpen(false);
+              }}
+              placeholder={t("browser.search")}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  setFilter("");
+                  setSearchOpen(false);
+                  (e.target as HTMLInputElement).blur();
+                }
+              }}
+            />
+          </span>
           {filter && (
-            <Button variant="ghost" size="sm" iconOnly onClick={() => setFilter("")}>
+            <Button
+              variant="ghost"
+              size="sm"
+              iconOnly
+              className="search-clear"
+              onClick={() => {
+                setFilter("");
+                searchRef.current?.focus();
+              }}
+            >
               <X size={12} />
             </Button>
           )}
@@ -875,6 +954,7 @@ export function FileBrowser(p: Props) {
         <span className="toolbar-sep" />
         <Button
           variant="ghost"
+          className="with-label"
           disabled={!canDownload}
           title={canDownload ? t("browser.download") : t("browser.downloadHint")}
           onClick={() => p.onDownload(selectedEntries.map(toItem), false)}
@@ -884,6 +964,7 @@ export function FileBrowser(p: Props) {
         </Button>
         <Button
           variant="ghost"
+          className="with-label"
           disabled={!canDownload}
           title={canDownload ? t("browser.downloadTo") : t("browser.downloadHint")}
           onClick={() => p.onDownload(selectedEntries.map(toItem), true)}
@@ -893,7 +974,7 @@ export function FileBrowser(p: Props) {
         </Button>
         <Button
           variant="ghost"
-          className="upload-btn"
+          className="with-label upload-btn"
           disabled={!p.share || p.view !== "files"}
           title={p.share ? t("browser.upload") : t("browser.uploadHint")}
           onClick={(e) => {

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FolderUp } from "lucide-react";
 import type { DownloadItem, Entry, SavedServer, Settings, Share, TransferProgress, Unsubscribe } from "./types";
 import { api, errorOf, isTauri, logToBackend } from "./api";
-import { useI18n } from "./i18n";
+import { setLocalePref, useI18n, type LocalePref } from "./i18n";
 import { parentPath } from "./format";
 import { Sidebar, type ServerStatus } from "./components/Sidebar";
 import { FileBrowser, type BrowserView, type NavIntent, type ViewMode } from "./components/FileBrowser";
@@ -79,6 +79,7 @@ export default function App() {
   const selectedRef = useRef(selectedId);
   selectedRef.current = selectedId;
   const refreshTimer = useRef<number | null>(null);
+  const dropValid = useRef(false);
 
   const selectedServer = useMemo(() => servers.find((s) => s.id === selectedId) ?? null, [servers, selectedId]);
 
@@ -326,10 +327,23 @@ export default function App() {
     let disposed = false;
     api
       .onFileDrop((e) => {
-        if (e.type === "enter" || e.type === "over") setDropActive(true);
-        else if (e.type === "leave") setDropActive(false);
-        else if (e.type === "drop") {
+        // Only drags that carry files count: not text, links or our own
+        // drag to Explorer passing over the window.
+        if (e.type === "enter") {
+          dropValid.current = e.paths.length > 0;
+          if (dropValid.current) {
+            setDropActive(true);
+            logToBackend(`file drop: enter with ${e.paths.length} item(s)`);
+          }
+        } else if (e.type === "over") {
+          if (dropValid.current) setDropActive(true);
+        } else if (e.type === "leave") {
+          dropValid.current = false;
           setDropActive(false);
+        } else if (e.type === "drop") {
+          dropValid.current = false;
+          setDropActive(false);
+          logToBackend(`file drop: ${e.paths.length} item(s)`);
           const serverId = selectedRef.current;
           const current = navRef.current;
           if (!serverId || !current.share || e.paths.length === 0) return;
@@ -350,6 +364,21 @@ export default function App() {
       unlisten?.();
     };
   }, [notify, describe, t]);
+
+  useEffect(() => {
+    let unlisten: Unsubscribe | undefined;
+    let disposed = false;
+    api
+      .onDragSkipped((n) => notify(t("toast.dragSkipped", { n }), "error"))
+      .then((u) => {
+        if (disposed) u();
+        else unlisten = u;
+      });
+    return () => {
+      disposed = true;
+      unlisten?.();
+    };
+  }, [notify, t]);
 
   const selectServer = useCallback(
     (id: string) => {
@@ -520,7 +549,8 @@ export default function App() {
 
   // ── Dev autopilot ─────────────────────────────────────────────────────
   // NEATNAS_DEV_AUTOPILOT="share=photo,open=2025/Kyoto,grid,preview=DSC_0003.jpg"
-  // Steps: share=, open=, grid, list, preview=, download=, transfers, settings, add.
+  // Steps: share=, open=, grid, list, preview=, download=, transfers, settings, add, rects,
+  // lang= (a locale or "system"), wait= (milliseconds before the next step).
   // replays UI steps once the listing is on screen, so the real app can be
   // screenshotted by tooling. Inert unless the backend passes the string.
   const autopilotSteps = useRef<string[] | null>(null);
@@ -549,12 +579,22 @@ export default function App() {
       else if (step === "settings") setDialog({ kind: "settings" });
       else if (step === "add") setDialog({ kind: "add" });
       else if (step === "transfers") setTransfersOpen(true);
-      else if (step.startsWith("download=")) {
+      else if (step.startsWith("lang=")) setLocalePref(step.slice(5) as LocalePref);
+      else if (step === "rects") {
+        // Where each row sits in the window, for input-driving tests.
+        const dpr = window.devicePixelRatio || 1;
+        document.querySelectorAll<HTMLElement>(".content [data-index]").forEach((row) => {
+          const r = row.getBoundingClientRect();
+          const name = row.querySelector(".file-name, .label")?.textContent ?? "";
+          logToBackend(`autopilot rect name=${name} x=${Math.round(r.left)} y=${Math.round(r.top)} w=${Math.round(r.width)} h=${Math.round(r.height)} dpr=${dpr}`);
+        });
+      } else if (step.startsWith("download=")) {
         const target = entries.find((e) => e.name === step.slice(9));
         if (target) void download([{ path: target.path, name: target.name, isDir: target.isDir }], false);
       }
       // Advance even when the step changed no state (e.g. mode already set).
-      window.setTimeout(() => setAutoTick((n) => n + 1), 900);
+      const pause = step.startsWith("wait=") ? Number(step.slice(5)) || 900 : 900;
+      window.setTimeout(() => setAutoTick((n) => n + 1), pause);
     }, 700);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps

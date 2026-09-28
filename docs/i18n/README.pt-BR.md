@@ -30,7 +30,7 @@ O Neat NAS é um app pequeno que faz uma coisa bem feita: abre no seu NAS. Adici
 - **Encontra o NAS sozinho.** Synology, QNAP, TrueNAS, um Raspberry Pi com Samba: tudo que anuncia SMB na rede aparece no diálogo de adicionar.
 - **Senhas ficam nas chaves do sistema.** Chaves do macOS e Gerenciador de Credenciais do Windows, nunca um arquivo de texto.
 - **Visualização Rápida de tudo.** Fotos, vídeo, áudio, PDF e texto vêm direto do NAS. Aperte espaço, como no Finder.
-- **Arquivos nos dois sentidos.** Baixe ou envie arquivos e pastas inteiras, arraste para o Finder, solte para enviar.
+- **Arquivos nos dois sentidos.** Baixe ou envie arquivos e pastas inteiras, arraste para o Finder ou o Explorador, solte para enviar.
 - **Transferências que resistem.** Transferências pausadas ou interrompidas continuam de onde pararam, mesmo depois de fechar o app.
 - **Grades de fotos instantâneas.** As miniaturas usam a prévia que a câmera embute em cada foto; pastas RAW e HEIC só precisam dos cabeçalhos.
 - **Claro e escuro, dez idiomas.**

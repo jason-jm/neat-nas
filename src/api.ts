@@ -68,6 +68,7 @@ const tauriBackend: Backend = {
   getSettings: () => invoke<Settings>("get_settings"),
   setDownloadDir: (path: string | null) => invoke<void>("set_download_dir", { path }),
   onTransferProgress: (cb) => listen<TransferProgress>("transfer:progress", (e) => cb(e.payload)),
+  onDragSkipped: (cb) => listen<number>("drag:skipped", (e) => cb(e.payload)),
   pickFolder: async (defaultPath?: string) => {
     const { open } = await import("@tauri-apps/plugin-dialog");
     const picked = await open({ directory: true, multiple: false, defaultPath });

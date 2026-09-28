@@ -30,7 +30,7 @@ Neat NAS est une petite app de bureau qui fait une seule chose, bien : elle s’
 - **Trouve votre NAS tout seul.** Synology, QNAP, TrueNAS, un Raspberry Pi sous Samba : tout ce qui annonce SMB sur le réseau apparaît dans la fenêtre d’ajout.
 - **Les mots de passe restent dans le trousseau.** Trousseau macOS et Gestionnaire d’identifiants Windows, jamais un fichier texte.
 - **Coup d’œil sur tout.** Photos, vidéo, audio, PDF et texte sont lus directement depuis le NAS. Appuyez sur Espace, comme dans le Finder.
-- **Des fichiers dans les deux sens.** Téléchargez ou envoyez fichiers et dossiers entiers, glissez vers le Finder, déposez pour envoyer.
+- **Des fichiers dans les deux sens.** Téléchargez ou envoyez fichiers et dossiers entiers, glissez vers le Finder ou l’Explorateur, déposez pour envoyer.
 - **Des transferts qui tiennent.** Les transferts suspendus ou interrompus reprennent là où ils s’étaient arrêtés, même après avoir quitté l’app.
 - **Des grilles de photos instantanées.** Les vignettes utilisent l’aperçu que l’appareil intègre dans chaque photo ; les dossiers RAW et HEIC ne lisent que les en-têtes.
 - **Clair et sombre, dix langues.**

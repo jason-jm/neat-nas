@@ -30,7 +30,7 @@ Neat NAS ist eine kleine Desktop-App, die eine Sache richtig macht: Sie öffnet 
 - **Findet dein NAS von selbst.** Synology, QNAP, TrueNAS, ein Raspberry Pi mit Samba: Alles, was SMB im Netzwerk ankündigt, erscheint im Dialog.
 - **Passwörter bleiben im Schlüsselbund.** macOS-Schlüsselbund und Windows-Anmeldeinformationsverwaltung, nie eine Textdatei.
 - **Übersicht für alles.** Fotos, Video, Audio, PDF und Text streamen direkt vom NAS. Leertaste drücken, wie im Finder.
-- **Dateien in beide Richtungen.** Dateien oder ganze Ordner laden und hochladen, in den Finder ziehen, zum Hochladen hineinziehen.
+- **Dateien in beide Richtungen.** Dateien oder ganze Ordner laden und hochladen, in den Finder oder Explorer ziehen, zum Hochladen hineinziehen.
 - **Übertragungen, die durchhalten.** Pausierte oder unterbrochene Übertragungen machen weiter, wo sie aufgehört haben, auch nach dem Beenden.
 - **Fotoraster ohne Wartezeit.** Miniaturen nutzen die Vorschau, die Kameras in jedes Foto einbetten; RAW- und HEIC-Ordner brauchen nur die Dateiköpfe.
 - **Hell und Dunkel, zehn Sprachen.**

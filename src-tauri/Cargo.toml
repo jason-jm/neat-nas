@@ -60,6 +60,9 @@ opt-level = 3
 panic = "abort"
 strip = true
 
+[target.'cfg(windows)'.dependencies]
+win-drag = { path = "crates/win-drag" }
+
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2 = "0.6"
 block2 = "0.6"
@@ -68,3 +71,8 @@ objc2-app-kit = { version = "0.3", default-features = false, features = ["std", 
 
 [dev-dependencies]
 tauri = { version = "2", features = ["test"] }
+
+# The Windows drag-out code is its own crate so its tests can run on Windows
+# without linking Tauri (see crates/win-drag).
+[workspace]
+members = ["crates/win-drag"]

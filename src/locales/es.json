@@ -167,5 +167,6 @@
   "settings.doubleClick": "Al hacer doble clic en un archivo",
   "settings.doubleClickHint": "La vista rápida abre cualquier archivo; los tipos que no puede mostrar enseñan un aviso con un botón de descarga. La barra espaciadora siempre abre la vista rápida.",
   "settings.action.preview": "Vista rápida",
-  "settings.action.download": "Descargar"
+  "settings.action.download": "Descargar",
+  "toast.dragSkipped": "Se omitieron {n} elemento(s) porque su ruta es demasiado larga para arrastrarlos al Explorador. Usa «Descargar»."
 }
