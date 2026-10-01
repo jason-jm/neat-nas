@@ -8,7 +8,7 @@
 
 O navegador de arquivos NAS mais leve para Mac e Windows. Salve endereço, usuário e senha uma única vez. Daí em diante, cada abertura vai direto aos seus arquivos.
 
-[**Baixar para macOS**](https://github.com/jason-jm/neat-nas/releases/latest) · [**Baixar para Windows**](https://github.com/jason-jm/neat-nas/releases/latest) · [Site](https://jason-jm.github.io/neat-nas/)
+[**Baixar para macOS**](https://github.com/jason-jm/neat-nas/releases/latest) · [**Baixar para Windows**](https://github.com/jason-jm/neat-nas/releases/latest) · [Site](https://neatnas.com/)
 
 [English](../../README.md) · [简体中文](README.zh-CN.md) · [繁體中文](README.zh-TW.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [Français](README.fr.md) · [Português](README.pt-BR.md) · [Русский](README.ru.md)
 

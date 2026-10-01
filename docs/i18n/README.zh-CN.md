@@ -8,7 +8,7 @@
 
 Mac 和 Windows 上最轻量的 NAS 文件浏览器。地址、用户名、密码保存一次，之后每次打开应用，直接就是你的文件。
 
-[**下载 macOS 版**](https://github.com/jason-jm/neat-nas/releases/latest) · [**下载 Windows 版**](https://github.com/jason-jm/neat-nas/releases/latest) · [官网](https://jason-jm.github.io/neat-nas/)
+[**下载 macOS 版**](https://github.com/jason-jm/neat-nas/releases/latest) · [**下载 Windows 版**](https://github.com/jason-jm/neat-nas/releases/latest) · [官网](https://neatnas.com/)
 
 [English](../../README.md) · [简体中文](README.zh-CN.md) · [繁體中文](README.zh-TW.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [Français](README.fr.md) · [Português](README.pt-BR.md) · [Русский](README.ru.md)
 

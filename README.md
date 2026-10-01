@@ -9,7 +9,7 @@
 The lightest NAS file browser for Mac and Windows.<br>
 Save the address, user name and password a single time. From then on, every launch opens straight into your files.
 
-[**Download for macOS**](https://github.com/jason-jm/neat-nas/releases/latest) · [**Download for Windows**](https://github.com/jason-jm/neat-nas/releases/latest) · [Website](https://jason-jm.github.io/neat-nas/)
+[**Download for macOS**](https://github.com/jason-jm/neat-nas/releases/latest) · [**Download for Windows**](https://github.com/jason-jm/neat-nas/releases/latest) · [Website](https://neatnas.com/)
 
 [![Release](https://img.shields.io/github/v/release/jason-jm/neat-nas?label=release&color=3d6bff)](https://github.com/jason-jm/neat-nas/releases/latest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-2fb344.svg)](LICENSE)

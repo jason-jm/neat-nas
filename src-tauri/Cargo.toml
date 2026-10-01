@@ -5,7 +5,7 @@ description = "A modern SMB NAS browser for Mac and Windows"
 authors = ["Neat NAS contributors"]
 license = "MIT"
 repository = "https://github.com/jason-jm/neat-nas"
-homepage = "https://jason-jm.github.io/neat-nas/"
+homepage = "https://neatnas.com/"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

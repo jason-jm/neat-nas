@@ -66,7 +66,7 @@ Rules of thumb: link to GitHub, not the website; disclose you are the author; an
 3. Quick Look works on everything: photos, video, audio, PDF, text, streamed straight from the NAS. Press Space, like Finder. [GIF]
 4. Transfers resume where they stopped, even after you quit. Drag files out to Finder, drop files in to upload.
 5. ~10 MB download. Native core + the web view your OS already has (Tauri 2), not a 200 MB Electron shell.
-6. Ten languages, light and dark, signed auto-updates. MIT licensed: https://github.com/jason-jm/neat-nas  Website: https://jason-jm.github.io/neat-nas/
+6. Ten languages, light and dark, signed auto-updates. MIT licensed: https://github.com/jason-jm/neat-nas  Website: https://neatnas.com/
 
 ## Chinese-speaking channels
 

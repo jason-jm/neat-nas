@@ -8,7 +8,7 @@
 
 Mac과 Windows를 위한 가장 가벼운 NAS 파일 브라우저. 주소, 사용자 이름, 비밀번호를 한 번만 저장하면 실행할 때마다 곧바로 파일이 열립니다.
 
-[**macOS용 다운로드**](https://github.com/jason-jm/neat-nas/releases/latest) · [**Windows용 다운로드**](https://github.com/jason-jm/neat-nas/releases/latest) · [웹사이트](https://jason-jm.github.io/neat-nas/)
+[**macOS용 다운로드**](https://github.com/jason-jm/neat-nas/releases/latest) · [**Windows용 다운로드**](https://github.com/jason-jm/neat-nas/releases/latest) · [웹사이트](https://neatnas.com/)
 
 [English](../../README.md) · [简体中文](README.zh-CN.md) · [繁體中文](README.zh-TW.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [Français](README.fr.md) · [Português](README.pt-BR.md) · [Русский](README.ru.md)
 

@@ -8,7 +8,7 @@
 
 Самый лёгкий файловый браузер для NAS на Mac и Windows. Сохраните адрес, имя пользователя и пароль один раз, и каждый запуск будет сразу открывать ваши файлы.
 
-[**Скачать для macOS**](https://github.com/jason-jm/neat-nas/releases/latest) · [**Скачать для Windows**](https://github.com/jason-jm/neat-nas/releases/latest) · [Сайт](https://jason-jm.github.io/neat-nas/)
+[**Скачать для macOS**](https://github.com/jason-jm/neat-nas/releases/latest) · [**Скачать для Windows**](https://github.com/jason-jm/neat-nas/releases/latest) · [Сайт](https://neatnas.com/)
 
 [English](../../README.md) · [简体中文](README.zh-CN.md) · [繁體中文](README.zh-TW.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [Français](README.fr.md) · [Português](README.pt-BR.md) · [Русский](README.ru.md)
 
